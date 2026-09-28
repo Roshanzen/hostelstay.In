@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Invoices - HostelStay.in Owner{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-header-left">
+        <div class="page-title-row">
+            <h1 class="page-title">Invoices &amp; Billing Statements</h1>
+            <span class="system-status-badge">{{ invoices.count }} Invoices</span>
+        </div>
+        <p class="page-subtitle">Generated rent invoices, due dates, and outstanding balance status</p>
+    </div>
+    <div class="page-header-right">
+        <a href="{% url 'web-payments' %}" class="btn btn-secondary">Payment Ledger &rarr;</a>
+    </div>
+</div>
+
+{% if invoices %}
+<div class="card">
+    <div class="card-header">
+        <div class="card-header-left">
+            <h3>Invoice Register</h3>
+            <span class="card-header-badge">{{ invoices.count }} Total</span>
+        </div>
+    </div>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>INVOICE ID</th>
+                    <th>TENANT</th>
+                    <th>BRANCH</th>
+                    <th>TOTAL</th>
+                    <th>PAID</th>
+                    <th>REMAINING</th>
+                    <th>DUE DATE</th>
+                    <th>STATUS</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for inv in invoices %}
+                <tr>
+                    <td>
+                        <span class="room-id-pill" style="font-size: 11px;">INV-{{ inv.id }}</span>
+                    </td>
+                    <td>
+                        <strong>{{ inv.tenant.name }}</strong>
+                    </td>
+                    <td>{{ inv.pg.name }}</td>
+                    <td>Rs {{ inv.total_amount|floatformat:0 }}</td>
+                    <td style="color: var(--emerald-text);">Rs {{ inv.paid_amount|floatformat:0 }}</td>
+                    <td>
+                        {% if inv.remaining_amount > 0 %}
+                        <strong style="color: var(--rose-text);">Rs {{ inv.remaining_amount|floatformat:0 }}</strong>
+                        {% else %}
+                        <span style="color: var(--slate-400);">Rs 0</span>
+                        {% endif %}
+                    </td>
+                    <td style="color: var(--slate-500); font-size: 12.5px;">{{ inv.due_date|date:"M d, Y" }}</td>
+                    <td>
+                        <span class="badge badge-{% if inv.status == 'paid' %}success{% elif inv.status == 'partial' %}warning{% else %}danger{% endif %}">
+                            {{ inv.status|title }}
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="card">
+    <div class="empty-state">
+        <h3>No invoices generated yet</h3>
+        <p>Billing statements will be displayed here as rent cycles run.</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

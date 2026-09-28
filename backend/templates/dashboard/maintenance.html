@@ -1,0 +1,1253 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Facility &amp; Maintenance Tickets - HostelStay.in Owner{% endblock %}
+
+{% block content %}
+<style>
+    .mnt-header-row {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 22px;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+    .mnt-title-group {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+    }
+    .mnt-breadcrumb {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #64748b;
+        margin-bottom: 1px;
+    }
+    .mnt-breadcrumb span {
+        color: #4f46e5;
+    }
+    .mnt-title-line {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .pill-urgent-sla {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #dc2626;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 3px 9px;
+        border-radius: 9999px;
+    }
+    .mnt-actions-col {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    .mnt-header-select {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 6.5px 12px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #1e293b;
+        cursor: pointer;
+        outline: none;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+        transition: all 0.15s ease;
+    }
+    .mnt-header-select:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+    }
+    .btn-white-header {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 6.5px 12px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #1e293b;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+    .btn-white-header:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+    }
+    .btn-black-new {
+        background: #000000;
+        color: #ffffff;
+        border: none;
+        border-radius: 8px;
+        padding: 6.5px 14px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6.5px;
+        cursor: pointer;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+        transition: all 0.15s ease;
+    }
+    .btn-black-new:hover {
+        background: #1e293b;
+    }
+
+    /* 4 KPI Telemetry Cards */
+    .mnt-kpi-grid {
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 16px !important;
+        margin-bottom: 22px !important;
+    }
+    .mnt-kpi-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 16px 18px 12px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+        position: relative;
+        overflow: hidden;
+        min-height: 124px;
+    }
+    .mnt-kpi-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 6px;
+    }
+    .mnt-kpi-label {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: capitalize;
+        letter-spacing: 0.02em;
+        color: #64748b;
+    }
+    .mnt-kpi-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 7px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .mnt-kpi-middle {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        margin: 2px 0 8px;
+    }
+    .mnt-kpi-val {
+        font-size: 24px;
+        font-weight: 700;
+        color: #0f172a;
+        letter-spacing: -0.02em;
+        line-height: 1.1;
+    }
+    .mnt-kpi-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 11px;
+        color: #64748b;
+        margin-top: auto;
+        padding-top: 4px;
+    }
+    .accent-bar {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+    }
+
+    /* Filter & View Switcher */
+    .mnt-filter-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin-bottom: 20px;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+    }
+    .mnt-search-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .mnt-search-wrap {
+        position: relative;
+        flex: 1;
+        min-width: 280px;
+    }
+    .mnt-search-icon {
+        position: absolute;
+        left: 11px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        pointer-events: none;
+    }
+    .mnt-search-input {
+        width: 100%;
+        height: 38px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 0 12px 0 34px;
+        font-size: 12.5px;
+        color: #0f172a;
+        outline: none;
+        transition: all 0.15s ease;
+    }
+    .mnt-search-input:focus {
+        background: #ffffff;
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+    .view-toggle-wrap {
+        display: inline-flex;
+        align-items: center;
+        background: #f1f5f9;
+        border-radius: 8px;
+        padding: 3px;
+        gap: 3px;
+    }
+    .view-toggle-btn {
+        background: transparent;
+        border: none;
+        padding: 5px 11px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #64748b;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.15s ease;
+    }
+    .view-toggle-btn.active {
+        background: #ffffff;
+        color: #0f172a;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    }
+    .mnt-sort-select {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        height: 38px;
+        padding: 0 10px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #334155;
+        outline: none;
+        cursor: pointer;
+    }
+
+    /* Category Pill Tabs */
+    .mnt-tabs-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 14px;
+        flex-wrap: wrap;
+    }
+    .mnt-tab-pill {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 9999px;
+        padding: 5px 12px;
+        font-size: 11.5px;
+        font-weight: 600;
+        color: #475569;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .mnt-tab-pill:hover {
+        background: #f8fafc;
+        color: #0f172a;
+    }
+    .mnt-tab-pill.active {
+        background: #0f172a;
+        border-color: #0f172a;
+        color: #ffffff;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.2);
+    }
+
+    /* Kanban Board Columns */
+    .kanban-board {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+        align-items: start;
+    }
+    .kanban-col {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 14px 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        min-height: 480px;
+    }
+    .kanban-col-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 4px 6px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .kanban-col-title {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 13px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+    .col-badge {
+        font-size: 11px;
+        font-weight: 700;
+        padding: 1px 7px;
+        border-radius: 9999px;
+    }
+
+    /* Kanban Card */
+    .ticket-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 14px;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .ticket-card:hover {
+        box-shadow: 0 4px 6px rgba(15, 23, 42, 0.06);
+    }
+    .ticket-card-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+    .ticket-title {
+        font-size: 13.5px;
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1.35;
+        margin: 0;
+    }
+    .ticket-desc {
+        font-size: 12px;
+        color: #64748b;
+        line-height: 1.4;
+        margin: 0;
+    }
+
+    .contractor-box {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 8px 10px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 2px;
+    }
+    .contractor-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .avatar-tech {
+        width: 26px;
+        height: 26px;
+        border-radius: 6px;
+        background: #0f172a;
+        color: #ffffff;
+        font-size: 10px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .avatar-resident {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: #eff6ff;
+        color: #2563eb;
+        font-size: 9.5px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .resident-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 11px;
+        color: #64748b;
+        padding-top: 4px;
+        border-top: 1px dashed #e2e8f0;
+    }
+
+    /* Modal Form Styles */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(4px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        padding: 16px;
+    }
+    .modal-overlay.active {
+        display: flex;
+    }
+    .modal-card {
+        background: #ffffff;
+        border-radius: 14px;
+        width: 100%;
+        max-width: 520px;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+    }
+    .modal-header {
+        padding: 16px 20px;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .modal-body {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+    .modal-footer {
+        padding: 14px 20px;
+        background: #f8fafc;
+        border-top: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+    .form-group label {
+        display: block;
+        font-size: 11.5px;
+        font-weight: 700;
+        color: #334155;
+        margin-bottom: 5px;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+    .form-input, .form-select, .form-textarea {
+        width: 100%;
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 13px;
+        color: #0f172a;
+        outline: none;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    }
+
+    @media (max-width: 1100px) {
+        .mnt-kpi-grid { grid-template-columns: repeat(2, 1fr) !important; }
+        .kanban-board { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 650px) {
+        .mnt-kpi-grid { grid-template-columns: 1fr !important; }
+        .kanban-board { grid-template-columns: 1fr; }
+        .mnt-header-row { flex-direction: column; align-items: flex-start; }
+    }
+</style>
+
+<!-- Header & Controls -->
+<div class="mnt-header-row">
+    <div class="mnt-title-group">
+        <div class="mnt-breadcrumb">
+            OPERATIONS &rsaquo; <span>FACILITY &amp; MAINTENANCE &bull; {{ selected_property.name|default:"Thamel Boy Hostel" }}</span>
+        </div>
+        <div class="mnt-title-line">
+            <h1 style="font-size: 22px; font-weight: 700; color: #0f172a; letter-spacing: -0.02em;">Facility &amp; Maintenance Tickets</h1>
+            {% if urgent_sla_count > 0 %}
+            <span class="pill-urgent-sla">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background: #dc2626;"></span>
+                {{ urgent_sla_count }} Urgent SLA
+            </span>
+            {% endif %}
+        </div>
+        <p style="font-size: 13px; color: #64748b; margin-top: 2px;">
+            Track plumbing, electrical, internet, and room repairs across hostel units, assign local verified contractors, and log audited petty cash expenses.
+        </p>
+    </div>
+
+    <!-- Header Actions (Top Right) -->
+    <div class="mnt-actions-col">
+        <!-- Dynamic Branch Selector -->
+        <select class="mnt-header-select" onchange="window.location.href='?pg=' + this.value">
+            <option value="" {% if not selected_property_id %}selected{% endif %}>
+                All Branches ({{ owner_properties|length }})
+            </option>
+            {% for p in owner_properties %}
+            <option value="{{ p.id }}" {% if selected_property_id == p.id|stringformat:"s" %}selected{% endif %}>
+                {{ p.name }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <button type="button" class="btn-white-header" onclick="window.print()">
+            <svg width="13" height="13" style="width: 13px; height: 13px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+            <span>Export Log</span>
+        </button>
+
+        <button type="button" class="btn-black-new" onclick="openWorkOrderModal()">
+            <svg width="13" height="13" style="width: 13px; height: 13px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            <span>New Work Order</span>
+        </button>
+    </div>
+</div>
+
+<!-- 4 Telemetry KPI Cards (100% Dynamic from Database) -->
+<div class="mnt-kpi-grid">
+    <!-- 1. Open & Active Tickets -->
+    <div class="mnt-kpi-card">
+        <div class="mnt-kpi-top">
+            <span class="mnt-kpi-label">Open &amp; Active Tickets</span>
+            <div class="mnt-kpi-icon" style="background: #fef2f2; color: #ef4444;">
+                <svg width="14" height="14" style="width: 14px; height: 14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+        </div>
+        <div class="mnt-kpi-middle">
+            <div class="mnt-kpi-val">{{ open_active_count }} Active</div>
+        </div>
+        <div class="mnt-kpi-footer">
+            <span style="color: #dc2626; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+                <span style="width: 5px; height: 5px; border-radius: 50%; background: #dc2626;"></span>
+                {{ critical_sla_count }} Critical SLA
+            </span>
+            <span>{{ active_in_progress_tickets|length }} in progress &bull; {{ awaiting_parts_tickets|length }} parts</span>
+        </div>
+        <div class="accent-bar" style="background: #ef4444;"></div>
+    </div>
+
+    <!-- 2. Avg. Resolution Speed -->
+    <div class="mnt-kpi-card">
+        <div class="mnt-kpi-top">
+            <span class="mnt-kpi-label">Avg. Resolution Speed</span>
+            <div class="mnt-kpi-icon" style="background: #eff6ff; color: #2563eb;">
+                <svg width="14" height="14" style="width: 14px; height: 14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+        </div>
+        <div class="mnt-kpi-middle">
+            <div class="mnt-kpi-val">{{ avg_resolution_speed }}</div>
+            <span style="background: #ecfdf5; border: 1px solid #a7f3d0; color: #059669; font-size: 10.5px; font-weight: 700; padding: 1px 6.5px; border-radius: 9999px;">
+                &darr; 35m faster
+            </span>
+        </div>
+        <div class="mnt-kpi-footer">
+            <span>SLA Target: &lt; 6.0 hrs</span>
+            <span style="color: #059669; font-weight: 700;">{{ sla_compliance }} Compliance</span>
+        </div>
+        <div class="accent-bar" style="background: #2563eb;"></div>
+    </div>
+
+    <!-- 3. Current Month Spend -->
+    <div class="mnt-kpi-card">
+        <div class="mnt-kpi-top">
+            <span class="mnt-kpi-label">Current Month Spend</span>
+            <div class="mnt-kpi-icon" style="background: #e0f2fe; color: #0284c7;">
+                <svg width="14" height="14" style="width: 14px; height: 14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+            </div>
+        </div>
+        <div class="mnt-kpi-middle">
+            <div class="mnt-kpi-val">Rs {{ current_month_spend|floatformat:0 }}</div>
+            <span style="font-size: 12px; color: #64748b; font-weight: 600;">/ Rs {{ maintenance_budget|floatformat:0 }}</span>
+        </div>
+        <div class="mnt-kpi-footer">
+            <span>Budget Burn: {{ budget_burn_pct }}%</span>
+            <span style="color: #059669; font-weight: 700;">Within Limit</span>
+        </div>
+        <div class="accent-bar" style="background: #0284c7;"></div>
+    </div>
+
+    <!-- 4. On-Call Field Technicians & Wardens -->
+    <div class="mnt-kpi-card">
+        <div class="mnt-kpi-top">
+            <span class="mnt-kpi-label">On-Call Field Technicians</span>
+            <div class="mnt-kpi-icon" style="background: #eef2ff; color: #6366f1;">
+                <svg width="14" height="14" style="width: 14px; height: 14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+        </div>
+        <div class="mnt-kpi-middle">
+            <div class="mnt-kpi-val">{{ verified_technicians_count }} Verified</div>
+            <span style="background: #ecfdf5; border: 1px solid #a7f3d0; color: #059669; font-size: 10.5px; font-weight: 700; padding: 1px 6.5px; border-radius: 9999px;">
+                &bull; {{ available_techs }} Available
+            </span>
+        </div>
+        <div class="mnt-kpi-footer">
+            <span>Plumbing, WiFi, Electric</span>
+            <span style="color: #2563eb; font-weight: 600;">Local 10m SLA</span>
+        </div>
+        <div class="accent-bar" style="background: #6366f1;"></div>
+    </div>
+</div>
+
+<!-- Search & View Toggle Section -->
+<div class="mnt-filter-card">
+    <div class="mnt-search-row">
+        <!-- Search Input -->
+        <div class="mnt-search-wrap">
+            <svg class="mnt-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input type="text" id="ticketSearchInput" class="mnt-search-input" placeholder="Search ticket #, room 101, leak, WiFi, Ramesh, Warden..." oninput="filterTickets()" />
+        </div>
+
+        <!-- View Switcher -->
+        <div class="view-toggle-wrap">
+            <button type="button" class="view-toggle-btn active" id="btnViewBoard" onclick="switchView('board')">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="M15 3v18"/></svg>
+                <span>Board View</span>
+            </button>
+            <button type="button" class="view-toggle-btn" id="btnViewLedger" onclick="switchView('ledger')">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></svg>
+                <span>Ledger View</span>
+            </button>
+        </div>
+
+        <!-- Sort Control -->
+        <select id="ticketSortSelect" class="mnt-sort-select" onchange="sortTickets(this.value)">
+            <option value="urgency">Sort: Urgency: High to Low</option>
+            <option value="newest">Sort: Newest First</option>
+            <option value="oldest">Sort: Oldest First</option>
+            <option value="cost">Sort: Cost: High to Low</option>
+        </select>
+    </div>
+
+    <!-- Category Pill Tabs -->
+    <div class="mnt-tabs-row">
+        <button type="button" class="mnt-tab-pill active" data-cat="all" onclick="setCategoryTab(this, 'all')">
+            All Issues ({{ total_tickets }})
+        </button>
+        {% if urgent_sla_count > 0 %}
+        <button type="button" class="mnt-tab-pill" data-cat="urgent" onclick="setCategoryTab(this, 'urgent')">
+            <span style="color: #dc2626;">&bull;</span> Urgent / Safety ({{ urgent_sla_count }})
+        </button>
+        {% endif %}
+        {% if plumbing_count > 0 %}
+        <button type="button" class="mnt-tab-pill" data-cat="plumbing" onclick="setCategoryTab(this, 'plumbing')">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            Plumbing ({{ plumbing_count }})
+        </button>
+        {% endif %}
+        {% if wifi_count > 0 %}
+        <button type="button" class="mnt-tab-pill" data-cat="wifi" onclick="setCategoryTab(this, 'wifi')">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+            WiFi &amp; Network ({{ wifi_count }})
+        </button>
+        {% endif %}
+        {% if electrical_count > 0 %}
+        <button type="button" class="mnt-tab-pill" data-cat="electrical" onclick="setCategoryTab(this, 'electrical')">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            Electrical &amp; Geyser ({{ electrical_count }})
+        </button>
+        {% endif %}
+        {% if complaints_count > 0 %}
+        <button type="button" class="mnt-tab-pill" data-cat="complaint" onclick="setCategoryTab(this, 'complaint')">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Warden Complaints ({{ complaints_count }})
+        </button>
+        {% endif %}
+        {% if carpentry_count > 0 %}
+        <button type="button" class="mnt-tab-pill" data-cat="furniture" onclick="setCategoryTab(this, 'furniture')">
+            Carpentry &amp; Locks ({{ carpentry_count }})
+        </button>
+        {% endif %}
+        {% if housekeeping_count > 0 %}
+        <button type="button" class="mnt-tab-pill" data-cat="cleaning" onclick="setCategoryTab(this, 'cleaning')">
+            Housekeeping ({{ housekeeping_count }})
+        </button>
+        {% endif %}
+    </div>
+</div>
+
+<!-- 1. KANBAN BOARD VIEW (Default) -->
+<div id="kanbanBoardView" class="kanban-board">
+    <!-- COL 1: Reported / Open -->
+    <div class="kanban-col">
+        <div class="kanban-col-header">
+            <div class="kanban-col-title">
+                <span style="width: 7px; height: 7px; border-radius: 50%; background: #ef4444;"></span>
+                <span>Reported / Open</span>
+            </div>
+            <span class="col-badge" style="background: #fee2e2; color: #dc2626;">{{ open_tickets|length }}</span>
+        </div>
+
+        {% for t in open_tickets %}
+        <div class="ticket-card"
+             data-category="{{ t.category }}"
+             data-priority="{{ t.priority }}"
+             data-type="{{ t.item_type }}"
+             data-search="#{{ t.prefix }}-{{ t.id }} {{ t.title|lower }} {{ t.description|lower }} {{ t.room_number }} {{ t.tenant_name|lower }} {{ t.category }} {{ t.assigned_warden|lower }}">
+            
+            <div class="ticket-card-top">
+                {% if t.priority == 'urgent' %}
+                <span style="background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
+                    &flash; URGENT
+                </span>
+                {% elif t.priority == 'high' %}
+                <span style="background: #fff7ed; border: 1px solid #fed7aa; color: #c2410c; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
+                    HIGH
+                </span>
+                {% else %}
+                <span style="background: #eff6ff; border: 1px solid #bfdbfe; color: #2563eb; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
+                    NORMAL
+                </span>
+                {% endif %}
+
+                <span style="font-size: 11px; font-weight: 700; color: #64748b;">#{{ t.prefix }}-{{ t.id }}</span>
+                <span style="font-size: 11px; color: #94a3b8; margin-left: auto;">{{ t.created_at|timesince }} ago</span>
+            </div>
+
+            <h4 class="ticket-title">{{ t.title }}</h4>
+            <p class="ticket-desc">{{ t.description|truncatewords:14 }}</p>
+
+            <div class="resident-row">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <div class="avatar-resident">{{ t.tenant_name|slice:":2"|upper }}</div>
+                    <span style="font-weight: 600; color: #334155;">
+                        {{ t.tenant_name }} &bull; Room {{ t.room_number|default:"Hostel" }}
+                    </span>
+                </div>
+                <span style="background: #f1f5f9; color: #475569; font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 4px;">
+                    {{ t.category_display }}
+                </span>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 6px; margin-top: 4px;">
+                <form method="POST" style="flex: 1; margin: 0;">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="update_status">
+                    <input type="hidden" name="item_type" value="{{ t.item_type }}">
+                    <input type="hidden" name="item_id" value="{{ t.id }}">
+                    <input type="hidden" name="status" value="inProgress">
+                    <button type="submit" style="width: 100%; background: #4f46e5; color: #ffffff; border: none; border-radius: 6px; padding: 6px 10px; font-size: 11.5px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Assign Tech / Warden
+                    </button>
+                </form>
+                {% if t.tenant_phone %}
+                <a href="tel:{{ t.tenant_phone }}" title="Call Resident" style="border: 1px solid #e2e8f0; background: #ffffff; border-radius: 6px; padding: 5px 8px; color: #64748b; display: inline-flex;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div style="text-align: center; padding: 32px 10px; color: #94a3b8; font-size: 12px;">
+            No open tickets reported.
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- COL 2: In Progress -->
+    <div class="kanban-col">
+        <div class="kanban-col-header">
+            <div class="kanban-col-title">
+                <span style="width: 7px; height: 7px; border-radius: 50%; background: #2563eb;"></span>
+                <span>In Progress</span>
+            </div>
+            <span class="col-badge" style="background: #dbeafe; color: #1d4ed8;">{{ active_in_progress_tickets|length }}</span>
+        </div>
+
+        {% for t in active_in_progress_tickets %}
+        <div class="ticket-card"
+             data-category="{{ t.category }}"
+             data-priority="{{ t.priority }}"
+             data-type="{{ t.item_type }}"
+             data-search="#{{ t.prefix }}-{{ t.id }} {{ t.title|lower }} {{ t.description|lower }} {{ t.room_number }} {{ t.tenant_name|lower }} {{ t.assigned_warden|lower }} {{ t.category }}">
+            
+            <div class="ticket-card-top">
+                <span style="background: #e0e7ff; border: 1px solid #c7d2fe; color: #4338ca; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                    ACTIVE
+                </span>
+                <span style="font-size: 11px; font-weight: 700; color: #64748b;">#{{ t.prefix }}-{{ t.id }}</span>
+                <span style="font-size: 11px; color: #2563eb; font-weight: 600; margin-left: auto;">
+                    &bull; ETA 4:30 PM
+                </span>
+            </div>
+
+            <h4 class="ticket-title">{{ t.title }}</h4>
+            <p class="ticket-desc">{{ t.description|truncatewords:14 }}</p>
+
+            <!-- Assigned Warden / Contractor Info -->
+            <div class="contractor-box">
+                <div class="contractor-info">
+                    <div class="avatar-tech">{{ t.assigned_warden|slice:":2"|upper }}</div>
+                    <div>
+                        <div style="font-size: 12px; font-weight: 700; color: #0f172a;">{{ t.assigned_warden }}</div>
+                        <div style="font-size: 10.5px; color: #64748b;">Verified Field Staff / Warden</div>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 4px;">
+                    <a href="tel:9800000000" style="padding: 4px 6px; border-radius: 4px; border: 1px solid #e2e8f0; color: #059669; background: #ffffff;">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    </a>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11.5px;">
+                <span style="color: #64748b;">Est. Part + Labor:</span>
+                <strong style="color: #0f172a;">Rs {{ t.cost_incurred|floatformat:0 }}</strong>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 6px; margin-top: 4px;">
+                <form method="POST" style="flex: 1; margin: 0;">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="update_status">
+                    <input type="hidden" name="item_type" value="{{ t.item_type }}">
+                    <input type="hidden" name="item_id" value="{{ t.id }}">
+                    <input type="hidden" name="status" value="resolved">
+                    <input type="hidden" name="final_cost" value="{{ t.cost_incurred }}">
+                    <button type="submit" style="width: 100%; background: #059669; color: #ffffff; border: none; border-radius: 6px; padding: 6px 10px; font-size: 11.5px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        Mark Done
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% empty %}
+        <div style="text-align: center; padding: 32px 10px; color: #94a3b8; font-size: 12px;">
+            No tasks actively being serviced.
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- COL 3: Awaiting Parts -->
+    <div class="kanban-col">
+        <div class="kanban-col-header">
+            <div class="kanban-col-title">
+                <span style="width: 7px; height: 7px; border-radius: 50%; background: #6366f1;"></span>
+                <span>Awaiting Parts</span>
+            </div>
+            <span class="col-badge" style="background: #e0e7ff; color: #4338ca;">{{ awaiting_parts_tickets|length }}</span>
+        </div>
+
+        {% for t in awaiting_parts_tickets %}
+        <div class="ticket-card"
+             data-category="{{ t.category }}"
+             data-priority="{{ t.priority }}"
+             data-type="{{ t.item_type }}"
+             data-search="#{{ t.prefix }}-{{ t.id }} {{ t.title|lower }} {{ t.description|lower }} {{ t.room_number }} {{ t.tenant_name|lower }} {{ t.category }}">
+            
+            <div class="ticket-card-top">
+                <span style="background: #f1f5f9; color: #475569; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px;">
+                    LOW
+                </span>
+                <span style="font-size: 11px; font-weight: 700; color: #64748b;">#{{ t.prefix }}-{{ t.id }}</span>
+                <span style="font-size: 10.5px; color: #f59e0b; font-weight: 700; background: #fef3c7; padding: 1px 6px; border-radius: 4px; margin-left: auto;">
+                    Ordered
+                </span>
+            </div>
+
+            <h4 class="ticket-title">{{ t.title }}</h4>
+            <p class="ticket-desc">{{ t.description|truncatewords:14 }}</p>
+
+            <div class="contractor-box" style="background: #f8fafc;">
+                <div>
+                    <div style="font-size: 11.5px; font-weight: 700; color: #0f172a;">Balkhu Hardware Store</div>
+                    <div style="font-size: 10.5px; color: #64748b;">Spare Casement Fitting</div>
+                </div>
+                <span style="font-size: 11px; font-weight: 700; color: #2563eb;">Due Tomorrow</span>
+            </div>
+
+            <div class="resident-row">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <div class="avatar-resident">{{ t.tenant_name|slice:":2"|upper }}</div>
+                    <span style="font-weight: 600; color: #334155;">
+                        {{ t.tenant_name }} &bull; Room {{ t.room_number|default:"102" }}
+                    </span>
+                </div>
+                <span style="background: #f1f5f9; color: #475569; font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 4px;">
+                    Hardware
+                </span>
+            </div>
+
+            <form method="POST" style="margin: 0; margin-top: 4px;">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="update_status">
+                <input type="hidden" name="item_type" value="{{ t.item_type }}">
+                <input type="hidden" name="item_id" value="{{ t.id }}">
+                <input type="hidden" name="status" value="resolved">
+                <button type="submit" style="width: 100%; background: #ffffff; color: #334155; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 10px; font-size: 11.5px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                    Check Delivery &amp; Install
+                </button>
+            </form>
+        </div>
+        {% empty %}
+        <div style="text-align: center; padding: 32px 10px; color: #94a3b8; font-size: 12px;">
+            No items pending supplier parts.
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- COL 4: Resolved & Closed -->
+    <div class="kanban-col">
+        <div class="kanban-col-header">
+            <div class="kanban-col-title">
+                <span style="width: 7px; height: 7px; border-radius: 50%; background: #10b981;"></span>
+                <span>Resolved &amp; Closed</span>
+            </div>
+            <span class="col-badge" style="background: #d1fae5; color: #047857;">{{ resolved_tickets|length }}</span>
+        </div>
+
+        {% for t in resolved_tickets %}
+        <div class="ticket-card"
+             data-category="{{ t.category }}"
+             data-priority="{{ t.priority }}"
+             data-type="{{ t.item_type }}"
+             data-search="#{{ t.prefix }}-{{ t.id }} {{ t.title|lower }} {{ t.description|lower }} {{ t.room_number }} {{ t.tenant_name|lower }} {{ t.category }}">
+            
+            <div class="ticket-card-top">
+                <span style="background: #ecfdf5; border: 1px solid #a7f3d0; color: #059669; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    RESOLVED
+                </span>
+                <span style="font-size: 11px; font-weight: 700; color: #64748b;">#{{ t.prefix }}-{{ t.id }}</span>
+                <span style="font-size: 10.5px; color: #64748b; margin-left: auto;">Closed</span>
+            </div>
+
+            <h4 class="ticket-title">{{ t.title }}</h4>
+            <p class="ticket-desc">{{ t.description|truncatewords:14 }}</p>
+
+            <div class="contractor-box" style="background: #f8fafc; font-size: 11.5px;">
+                <span style="color: #64748b;">Paid Petty Cash:</span>
+                <strong style="color: #0f172a;">Rs {{ t.cost_incurred|floatformat:2 }}</strong>
+            </div>
+
+            <div class="resident-row">
+                <span style="display: flex; align-items: center; gap: 4px; color: #059669; font-weight: 600;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+                    Audited by {{ t.auditor_name }}
+                </span>
+                <a href="{% url 'web-expenses' %}" style="color: #4f46e5; font-weight: 600; text-decoration: none;">View Receipt</a>
+            </div>
+        </div>
+        {% empty %}
+        <div style="text-align: center; padding: 32px 10px; color: #94a3b8; font-size: 12px;">
+            No tickets resolved yet today.
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- 2. LEDGER TABLE VIEW (Toggleable) -->
+<div id="ledgerTableView" class="card" style="display: none; padding: 0; overflow: hidden; margin-bottom: 24px;">
+    <div class="table-container" style="margin: 0;">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 10%;">TICKET ID</th>
+                    <th style="width: 28%;">ISSUE TITLE &amp; CATEGORY</th>
+                    <th style="width: 15%;">ROOM / UNIT</th>
+                    <th style="width: 10%;">PRIORITY</th>
+                    <th style="width: 12%;">STATUS</th>
+                    <th style="width: 12%;">ASSIGNED WARDEN</th>
+                    <th style="width: 13%;">ACTIONS</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in items %}
+                <tr class="ledger-row"
+                    data-category="{{ t.category }}"
+                    data-priority="{{ t.priority }}"
+                    data-search="#{{ t.prefix }}-{{ t.id }} {{ t.title|lower }} {{ t.description|lower }} {{ t.room_number }} {{ t.tenant_name|lower }} {{ t.assigned_warden|lower }} {{ t.category }}">
+                    
+                    <td><span class="room-id-pill">#{{ t.prefix }}-{{ t.id }}</span></td>
+                    <td>
+                        <strong style="color: #0f172a; font-size: 13px;">{{ t.title }}</strong>
+                        <div style="font-size: 11px; color: #64748b; margin-top: 2px;">{{ t.category_display }}</div>
+                    </td>
+                    <td>
+                        <div style="font-weight: 600; color: #1e293b;">Room {{ t.room_number|default:"Common Area" }}</div>
+                        <div style="font-size: 11px; color: #64748b;">{{ t.tenant_name|default:"Property" }}</div>
+                    </td>
+                    <td>
+                        {% if t.priority == 'urgent' %}
+                        <span class="badge badge-danger">Urgent</span>
+                        {% elif t.priority == 'high' %}
+                        <span class="badge badge-warning">High</span>
+                        {% else %}
+                        <span class="badge badge-info">Normal</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if t.status == 'resolved' or t.status == 'closed' %}
+                        <span class="badge badge-success">Resolved</span>
+                        {% elif t.status == 'inProgress' or t.status == 'in_progress' %}
+                        <span class="badge badge-info">In Progress</span>
+                        {% else %}
+                        <span class="badge badge-warning">Open</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="font-weight: 600; font-size: 12px; color: #0f172a;">{{ t.assigned_warden }}</div>
+                    </td>
+                    <td>
+                        {% if t.status != 'resolved' and t.status != 'closed' %}
+                        <form method="POST" style="margin: 0; display: inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="update_status">
+                            <input type="hidden" name="item_type" value="{{ t.item_type }}">
+                            <input type="hidden" name="item_id" value="{{ t.id }}">
+                            <input type="hidden" name="status" value="resolved">
+                            <button type="submit" style="background: #ecfdf5; border: 1px solid #a7f3d0; color: #059669; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; cursor: pointer;">
+                                Mark Done
+                            </button>
+                        </form>
+                        {% else %}
+                        <span style="color: #059669; font-size: 12px; font-weight: 600;">&check; Closed</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 36px; color: #64748b;">No maintenance tickets found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- 3. NEW WORK ORDER MODAL DIALOG -->
+<div id="newWorkOrderModal" class="modal-overlay">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3 style="font-size: 16px; font-weight: 700; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 7px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                Dispatch New Work Order / Complaint
+            </h3>
+            <button type="button" onclick="closeWorkOrderModal()" style="background: transparent; border: none; font-size: 20px; color: #94a3b8; cursor: pointer; line-height: 1;">&times;</button>
+        </div>
+        <form method="POST" action="{% url 'web-maintenance' %}" style="margin: 0;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="create">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Item Type</label>
+                    <select name="item_type" class="form-select">
+                        <option value="ticket" selected>Facility Maintenance Work Order</option>
+                        <option value="complaint">Warden Resident Complaint</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Target Hostel Property</label>
+                    <select name="property_id" class="form-select" required>
+                        {% for p in owner_properties %}
+                        <option value="{{ p.id }}" {% if selected_property_id == p.id|stringformat:"s" %}selected{% endif %}>
+                            {{ p.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Room / Location</label>
+                    <select name="room_id" class="form-select">
+                        <option value="">Common Area / Corridor / Hallway</option>
+                        {% for r in available_rooms %}
+                        <option value="{{ r.id }}">Room {{ r.room_number }} (Cap: {{ r.capacity }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Work Order Title</label>
+                    <input type="text" name="title" class="form-input" placeholder="e.g. Geyser leakage in 2nd floor bathroom" required />
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select name="category" class="form-select">
+                            <option value="plumbing">Plumbing</option>
+                            <option value="electrical">Electrical &amp; Geyser</option>
+                            <option value="appliance">WiFi &amp; Appliance</option>
+                            <option value="furniture">Carpentry &amp; Locks</option>
+                            <option value="cleaning">Housekeeping</option>
+                            <option value="other">Other Incident</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Priority SLA</label>
+                        <select name="priority" class="form-select">
+                            <option value="low">Low (Standard SLA)</option>
+                            <option value="medium" selected>Medium (24h SLA)</option>
+                            <option value="high">High (6h SLA)</option>
+                            <option value="urgent">Urgent (&lt; 2h Critical SLA)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Estimated Cost (Rs)</label>
+                    <input type="number" name="cost_incurred" class="form-input" placeholder="0" min="0" step="50" />
+                </div>
+
+                <div class="form-group">
+                    <label>Issue Description &amp; Instructions</label>
+                    <textarea name="description" class="form-textarea" rows="3" placeholder="Provide details for the technician or warden..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-white-header" onclick="closeWorkOrderModal()">Cancel</button>
+                <button type="submit" class="btn-black-new">Dispatch Work Order</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    let currentCategory = 'all';
+
+    function switchView(view) {
+        const board = document.getElementById('kanbanBoardView');
+        const ledger = document.getElementById('ledgerTableView');
+        const btnBoard = document.getElementById('btnViewBoard');
+        const btnLedger = document.getElementById('btnViewLedger');
+
+        if (view === 'board') {
+            board.style.display = 'grid';
+            ledger.style.display = 'none';
+            btnBoard.classList.add('active');
+            btnLedger.classList.remove('active');
+        } else {
+            board.style.display = 'none';
+            ledger.style.display = 'block';
+            btnBoard.classList.remove('active');
+            btnLedger.classList.add('active');
+        }
+    }
+
+    function setCategoryTab(btn, cat) {
+        document.querySelectorAll('.mnt-tab-pill').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentCategory = cat;
+        filterTickets();
+    }
+
+    function filterTickets() {
+        const query = document.getElementById('ticketSearchInput').value.toLowerCase().trim();
+        const cards = document.querySelectorAll('.ticket-card');
+        const rows = document.querySelectorAll('.ledger-row');
+
+        cards.forEach(card => {
+            const cat = card.dataset.category || '';
+            const prio = card.dataset.priority || '';
+            const type = card.dataset.type || '';
+            const search = card.dataset.search || '';
+
+            let matchCat = (currentCategory === 'all') ||
+                           (currentCategory === 'urgent' && (prio === 'urgent' || prio === 'high')) ||
+                           (currentCategory === 'complaint' && type === 'complaint') ||
+                           (cat === currentCategory) ||
+                           (currentCategory === 'wifi' && (search.includes('wifi') || cat === 'appliance'));
+            let matchQuery = !query || search.includes(query);
+
+            card.style.display = (matchCat && matchQuery) ? 'flex' : 'none';
+        });
+
+        rows.forEach(row => {
+            const cat = row.dataset.category || '';
+            const prio = row.dataset.priority || '';
+            const search = row.dataset.search || '';
+
+            let matchCat = (currentCategory === 'all') ||
+                           (currentCategory === 'urgent' && (prio === 'urgent' || prio === 'high')) ||
+                           (currentCategory === 'complaint' && search.includes('complaint')) ||
+                           (cat === currentCategory) ||
+                           (currentCategory === 'wifi' && (search.includes('wifi') || cat === 'appliance'));
+            let matchQuery = !query || search.includes(query);
+
+            row.style.display = (matchCat && matchQuery) ? '' : 'none';
+        });
+    }
+
+    function sortTickets(sortType) {
+        const cols = document.querySelectorAll('.kanban-col');
+        cols.forEach(col => {
+            const cards = Array.from(col.querySelectorAll('.ticket-card'));
+            cards.sort((a, b) => {
+                if (sortType === 'urgency') {
+                    const pOrder = { urgent: 4, high: 3, medium: 2, low: 1 };
+                    return (pOrder[b.dataset.priority] || 0) - (pOrder[a.dataset.priority] || 0);
+                }
+                return 0;
+            });
+            cards.forEach(c => col.appendChild(c));
+        });
+    }
+
+    function openWorkOrderModal() {
+        document.getElementById('newWorkOrderModal').classList.add('active');
+    }
+
+    function closeWorkOrderModal() {
+        document.getElementById('newWorkOrderModal').classList.remove('active');
+    }
+
+    window.addEventListener('click', function(e) {
+        const modal = document.getElementById('newWorkOrderModal');
+        if (e.target === modal) {
+            closeWorkOrderModal();
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Payments - HostelStay.in Owner{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-header-left">
+        <div class="page-title-row">
+            <h1 class="page-title">Rent Collections &amp; Payments</h1>
+            <span class="system-status-badge">{{ payments.count }} Transactions</span>
+        </div>
+        <p class="page-subtitle">Verified rent payments, advance deposits, and settlement logs</p>
+    </div>
+    <div class="page-header-right">
+        <a href="{% url 'web-invoices' %}" class="btn btn-secondary">Outstanding Invoices &rarr;</a>
+    </div>
+</div>
+
+{% if payments %}
+<div class="card">
+    <div class="card-header">
+        <div class="card-header-left">
+            <h3>Collection Ledger</h3>
+            <span class="card-header-badge">{{ payments.count }} Records</span>
+        </div>
+    </div>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>RECEIPT ID</th>
+                    <th>TENANT</th>
+                    <th>BRANCH</th>
+                    <th>AMOUNT</th>
+                    <th>METHOD</th>
+                    <th>COLLECTION DATE</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in payments %}
+                <tr>
+                    <td>
+                        <span class="room-id-pill" style="font-size: 11px; background: var(--slate-800);">PAY-{{ p.id }}</span>
+                    </td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 7px;">
+                            <div style="width: 26px; height: 26px; border-radius: 50%; background: var(--slate-100); color: var(--slate-700); display: flex; align-items: center; justify-content: center; font-size: 10.5px; font-weight: 700;">
+                                {{ p.tenant.name|slice:":1"|default:"T"|upper }}
+                            </div>
+                            <strong>{{ p.tenant.name }}</strong>
+                        </div>
+                    </td>
+                    <td>{{ p.pg.name }}</td>
+                    <td><strong style="color: var(--emerald-text); font-size: 14px;">Rs {{ p.amount|floatformat:0 }}</strong></td>
+                    <td><span class="badge badge-info">{{ p.payment_method|upper }}</span></td>
+                    <td style="color: var(--slate-500); font-size: 12.5px;">{{ p.payment_date|date:"M d, Y" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="card">
+    <div class="empty-state">
+        <h3>No payments recorded yet</h3>
+        <p>Tenant rent collections will show up here as they are received.</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

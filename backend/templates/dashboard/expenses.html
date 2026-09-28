@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Expenses - HostelStay.in Owner{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-header-left">
+        <div class="page-title-row">
+            <h1 class="page-title">Operational Expenses</h1>
+            <span class="system-status-badge">{{ expenses.count }} Logged</span>
+        </div>
+        <p class="page-subtitle">Track property overhead, maintenance disbursements, groceries, and bills</p>
+    </div>
+    <div class="page-header-right">
+        <a href="{% url 'web-reports' %}" class="btn btn-secondary">Financial Reports &rarr;</a>
+    </div>
+</div>
+
+{% if expenses %}
+<div class="card">
+    <div class="card-header">
+        <div class="card-header-left">
+            <h3>Disbursement Ledger</h3>
+            <span class="card-header-badge">{{ expenses.count }} Records</span>
+        </div>
+    </div>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>BRANCH</th>
+                    <th>CATEGORY</th>
+                    <th>AMOUNT</th>
+                    <th>DATE</th>
+                    <th>DESCRIPTION</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for e in expenses %}
+                <tr>
+                    <td><strong>{{ e.pg.name }}</strong></td>
+                    <td><span class="badge badge-warning">{{ e.get_category_display }}</span></td>
+                    <td><strong style="color: var(--rose-text); font-size: 13.5px;">Rs {{ e.amount|floatformat:0 }}</strong></td>
+                    <td style="color: var(--slate-500); font-size: 12.5px;">{{ e.date|date:"M d, Y" }}</td>
+                    <td>{{ e.description|default:"-" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="card">
+    <div class="empty-state">
+        <h3>No expenses recorded yet</h3>
+        <p>Operational costs and disbursements will be listed here.</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Register - HostelStay.in Owner Portal{% endblock %}
+
+{% block content %}
+<div class="auth-container" style="max-width: 500px;">
+    <div class="auth-card">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+            <div class="auth-brand-badge" style="margin-bottom: 0;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 21h18"/>
+                    <path d="M9 8h1"/><path d="M9 12h1"/><path d="M9 16h1"/>
+                    <path d="M14 8h1"/><path d="M14 12h1"/><path d="M14 16h1"/>
+                    <path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"/>
+                </svg>
+            </div>
+            <div>
+                <h2 style="font-size: 17px; font-weight: 700; color: var(--slate-900); line-height: 1.2;">HostelStay.in</h2>
+                <span style="font-size: 10px; font-weight: 700; color: var(--slate-400); letter-spacing: 0.08em; text-transform: uppercase;">PG Manager &bull; Coliving OS</span>
+            </div>
+        </div>
+
+        <h1>Create First Owner Account</h1>
+        <p class="subtitle">Set up your owner credentials and initial property</p>
+
+        <form method="post" action="{% url 'web-register' %}">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="id_name">Full Name *</label>
+                <input type="text" name="name" id="id_name" class="form-control" 
+                       placeholder="e.g. Elon Maskey" required autofocus value="{{ name|default:'' }}">
+            </div>
+
+            <div class="form-group">
+                <label for="id_email">Email Address *</label>
+                <input type="email" name="email" id="id_email" class="form-control" 
+                       placeholder="e.g. owner@hostelstay.in" required value="{{ email|default:'' }}">
+            </div>
+
+            <div class="form-group">
+                <label for="id_phone">Contact Phone Number</label>
+                <input type="text" name="phone" id="id_phone" class="form-control" 
+                       placeholder="e.g. 9801234567" value="{{ phone|default:'' }}">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div class="form-group">
+                    <label for="id_password">Password *</label>
+                    <input type="password" name="password" id="id_password" class="form-control" 
+                           placeholder="Min 6 characters" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_password_confirm">Confirm Password *</label>
+                    <input type="password" name="password_confirm" id="id_password_confirm" class="form-control" 
+                           placeholder="Repeat password" required>
+                </div>
+            </div>
+
+            <div style="border-top: 1px solid var(--slate-200); margin: 18px 0 16px; padding-top: 14px;">
+                <p style="font-size: 11px; font-weight: 700; color: var(--slate-500); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em;">
+                    Initial Property Details (Optional)
+                </p>
+                <div class="form-group">
+                    <label for="id_prop_name">Property Name</label>
+                    <input type="text" name="property_name" id="id_prop_name" class="form-control" 
+                           placeholder="e.g. Max boys hostel" value="{{ property_name|default:'' }}">
+                </div>
+                <div class="form-group">
+                    <label for="id_prop_address">Property Address</label>
+                    <input type="text" name="property_address" id="id_prop_address" class="form-control" 
+                           placeholder="e.g. Thamel, Kathmandu" value="{{ property_address|default:'' }}">
+                </div>
+                <div class="form-group">
+                    <label for="id_prop_rooms">Total Rooms</label>
+                    <input type="number" name="property_rooms" id="id_prop_rooms" class="form-control" 
+                           placeholder="e.g. 10" min="1" value="{{ property_rooms|default:'' }}">
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; height: 42px; margin-top: 6px; font-size: 13.5px;">
+                Create Account &amp; Enter Dashboard &rarr;
+            </button>
+        </form>
+
+        <div class="auth-links">
+            Already have an owner account? <a href="{% url 'web-login' %}"><strong>Sign In</strong></a>
+        </div>
+    </div>
+</div>
+{% endblock %}

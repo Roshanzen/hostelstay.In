@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ property.name }} - HostelStay.in Owner{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-header-left">
+        <div class="page-title-row">
+            <h1 class="page-title">{{ property.name }}</h1>
+            <span class="system-status-badge">{% if property.status == 'active' %}Active Branch{% else %}{{ property.status|title }}{% endif %}</span>
+        </div>
+        <p class="page-subtitle">{{ property.address|default:"No address set" }} &bull; {{ property.phone|default:"No phone set" }} &bull; {{ property.email|default:"" }}</p>
+    </div>
+    <div class="page-header-right" style="display: flex; gap: 8px;">
+        <a href="{% url 'web-properties' %}" class="btn btn-secondary">&larr; Back to Properties</a>
+        <a href="{% url 'web-property-edit' property.id %}" class="btn btn-secondary">&#9998; Edit Branch</a>
+        <form method="post" action="{% url 'web-property-delete' property.id %}" style="display: inline;" onsubmit="return confirm('Are you sure you want to deactivate or remove {{ property.name }}? If active tenants exist, the branch will be safely deactivated to protect audit history.');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-secondary" style="color: #ef4444; border-color: #fee2e2;">&#128465; Deactivate</button>
+        </form>
+    </div>
+</div>
+
+<!-- Property KPI Cards -->
+<div class="stats-grid-8" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 24px;">
+    <div class="kpi-card">
+        <div class="kpi-header">
+            <span class="kpi-title">TOTAL ROOMS</span>
+        </div>
+        <div class="kpi-value-row">
+            <span class="kpi-value">{{ property.total_rooms }}</span>
+        </div>
+        <div class="kpi-footer">
+            <span>{{ rooms.count }} active configured</span>
+        </div>
+    </div>
+
+    <div class="kpi-card">
+        <div class="kpi-header">
+            <span class="kpi-title">TOTAL BEDS</span>
+            <span class="kpi-badge kpi-badge-live">{{ occupancy_pct }}% Occ</span>
+        </div>
+        <div class="kpi-value-row">
+            <span class="kpi-value">{{ total_beds }}</span>
+        </div>
+        <div class="kpi-footer">
+            <span>{{ occupied_beds }} Occupied &bull; {{ available_beds }} Available</span>
+        </div>
+    </div>
+
+    <div class="kpi-card">
+        <div class="kpi-header">
+            <span class="kpi-title">ACTIVE RESIDENTS</span>
+        </div>
+        <div class="kpi-value-row">
+            <span class="kpi-value accent">{{ tenants.count }}</span>
+        </div>
+        <div class="kpi-footer">
+            <span>Enrolled in rooms</span>
+        </div>
+    </div>
+
+    <div class="kpi-card">
+        <div class="kpi-header">
+            <span class="kpi-title">MONTHLY INVOICED</span>
+        </div>
+        <div class="kpi-value-row">
+            <span class="kpi-value positive">Rs {{ monthly_invoiced|floatformat:0 }}</span>
+        </div>
+        <div class="kpi-footer">
+            <span>Rs {{ total_collected|floatformat:0 }} collected</span>
+        </div>
+    </div>
+</div>
+
+<!-- Assigned Wardens -->
+<div class="card" style="margin-bottom: 20px;">
+    <div class="card-header">
+        <div class="card-header-left">
+            <h3>Assigned Wardens</h3>
+            <span class="card-header-badge">{{ assignments.count }} Assigned</span>
+        </div>
+        <a href="{% url 'web-wardens' %}?property_id={{ property.id }}" class="btn btn-sm btn-secondary">+ Manage Wardens</a>
+    </div>
+    {% if assignments %}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>WARDEN</th>
+                    <th>EMAIL</th>
+                    <th>PHONE</th>
+                    <th>ASSIGNED DATE</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for assign in assignments %}
+                <tr>
+                    <td><strong>{{ assign.warden.name }}</strong></td>
+                    <td>{{ assign.warden.email }}</td>
+                    <td>{{ assign.warden.phone|default:"-" }}</td>
+                    <td style="color: var(--slate-500);">{{ assign.assigned_at|date:"Y-m-d" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state" style="padding: 24px;">
+        <p style="margin: 0; color: var(--slate-500);">No warden assigned to this property yet.</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Rooms in Property -->
+<div class="card" style="margin-bottom: 20px;">
+    <div class="card-header">
+        <div class="card-header-left">
+            <h3>Configured Rooms</h3>
+            <span class="card-header-badge">{{ rooms.count }} Rooms</span>
+        </div>
+        <a href="{% url 'web-rooms' %}?pg={{ property.id }}" class="btn btn-sm btn-secondary">Manage Rooms &rarr;</a>
+    </div>
+    {% if rooms %}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>ROOM NUMBER</th>
+                    <th>FLOOR</th>
+                    <th>TYPE</th>
+                    <th>CAPACITY</th>
+                    <th>RENT</th>
+                    <th>STATUS</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for room in rooms %}
+                <tr>
+                    <td><strong>Room {{ room.room_number }}</strong></td>
+                    <td>{{ room.floor|default:"-" }}</td>
+                    <td>{{ room.room_type|default:"Standard" }}</td>
+                    <td>{{ room.capacity }} beds ({{ room.occupied_count }} filled)</td>
+                    <td>Rs {{ room.rent_amount|floatformat:0 }}</td>
+                    <td><span class="badge badge-{% if room.status == 'available' %}success{% else %}info{% endif %}">{{ room.status|title }}</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state" style="padding: 24px;">
+        <p style="margin: 0; color: var(--slate-500);">No rooms configured for this branch yet.</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Active Tenants in Property -->
+<div class="card">
+    <div class="card-header">
+        <div class="card-header-left">
+            <h3>Active Enrolled Residents</h3>
+            <span class="card-header-badge">{{ tenants.count }} Residents</span>
+        </div>
+        <a href="{% url 'web-tenants' %}?pg={{ property.id }}" class="btn btn-sm btn-secondary">All Tenants &rarr;</a>
+    </div>
+    {% if tenants %}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>TENANT</th>
+                    <th>ROOM &amp; BED</th>
+                    <th>CONTACT</th>
+                    <th>MOVE-IN DATE</th>
+                    <th>RENT</th>
+                    <th>STATUS</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in tenants %}
+                <tr>
+                    <td><strong>{{ t.name }}</strong></td>
+                    <td>{% if t.room %}Room {{ t.room.room_number }}{% else %}Unassigned{% endif %} {% if t.bed %}({{ t.bed.label }}){% endif %}</td>
+                    <td>{{ t.phone }}</td>
+                    <td>{{ t.move_in_date|date:"Y-m-d" }}</td>
+                    <td>Rs {{ t.rent_amount|floatformat:0 }}</td>
+                    <td><span class="badge badge-success">{{ t.status|title }}</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state" style="padding: 24px;">
+        <p style="margin: 0; color: var(--slate-500);">No active tenants registered in this property yet.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Beds - HostelStay.in Owner{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-header-left">
+        <div class="page-title-row">
+            <h1 class="page-title">Bed Inventory &amp; Slots</h1>
+            <span class="system-status-badge">{{ beds.count }} Beds</span>
+        </div>
+        <p class="page-subtitle">Granular bed-level occupancy, tenant allocation, and vacancy status</p>
+    </div>
+    <div class="page-header-right">
+        <a href="{% url 'web-rooms' %}" class="btn btn-secondary">View Rooms &rarr;</a>
+    </div>
+</div>
+
+{% if beds %}
+<div class="card">
+    <div class="card-header">
+        <div class="card-header-left">
+            <h3>Individual Bed Slots</h3>
+            <span class="card-header-badge">{{ beds.count }} Configured</span>
+        </div>
+    </div>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>BED LABEL</th>
+                    <th>BRANCH</th>
+                    <th>ROOM</th>
+                    <th>MONTHLY RENT</th>
+                    <th>OCCUPIED BY</th>
+                    <th>STATUS</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for b in beds %}
+                <tr>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--slate-400);"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/></svg>
+                            <strong>{{ b.label }}</strong>
+                        </div>
+                    </td>
+                    <td>{{ b.pg.name }}</td>
+                    <td><span class="room-id-pill" style="font-size: 11px;">Room {{ b.room.room_number }}</span></td>
+                    <td><strong>Rs {{ b.rent|floatformat:0 }}</strong></td>
+                    <td>
+                        {% if b.tenant %}
+                        <div style="display: flex; align-items: center; gap: 7px;">
+                            <div style="width: 24px; height: 24px; border-radius: 50%; background: var(--brand-blue-light); color: var(--brand-blue); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700;">
+                                {{ b.tenant.name|slice:":1"|upper }}
+                            </div>
+                            <span style="font-weight: 600; color: var(--slate-800);">{{ b.tenant.name }}</span>
+                        </div>
+                        {% else %}
+                        <span style="color: var(--slate-400); font-style: italic;">Vacant</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if b.status == 'available' %}
+                        <span class="badge badge-success">Available</span>
+                        {% elif b.status == 'occupied' %}
+                        <span class="badge badge-info">Occupied</span>
+                        {% else %}
+                        <span class="badge badge-warning">{{ b.status|title }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="card">
+    <div class="empty-state">
+        <h3>No bed records found</h3>
+        <p>Beds will be listed here as room slots are configured.</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

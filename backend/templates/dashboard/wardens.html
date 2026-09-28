@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Wardens - HostelStay.in Owner{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-header-left">
+        <div class="page-title-row">
+            <h1 class="page-title">Wardens &amp; Supervisors</h1>
+            <span class="system-status-badge">{{ assignments.count }} Assigned</span>
+        </div>
+        <p class="page-subtitle">Manage warden accounts, property assignments, and operational permissions</p>
+    </div>
+    <div class="page-header-right">
+        <button type="button" class="btn btn-secondary" onclick="openGlobalModal('assignWardenModal')">Assign Existing</button>
+        <button type="button" class="btn btn-primary" onclick="openGlobalModal('inviteWardenModal')">+ Invite Warden</button>
+    </div>
+</div>
+
+{% if assignments %}
+<div class="card">
+    <div class="card-header">
+        <div class="card-header-left">
+            <h3>Active Assignments</h3>
+            <span class="card-header-badge">{{ assignments.count }} Active</span>
+        </div>
+    </div>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>WARDEN</th>
+                    <th>EMAIL</th>
+                    <th>PHONE</th>
+                    <th>ASSIGNED PROPERTY</th>
+                    <th>PERMISSIONS</th>
+                    <th>ACTIONS</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for assign in assignments %}
+                <tr>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 9px;">
+                            <div style="width: 32px; height: 32px; border-radius: var(--radius-full); background: var(--slate-100); color: var(--slate-700); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px;">
+                                {{ assign.warden.name|slice:":1"|upper }}
+                            </div>
+                            <strong>{{ assign.warden.name }}</strong>
+                        </div>
+                    </td>
+                    <td>{{ assign.warden.email }}</td>
+                    <td>{{ assign.warden.phone|default:"-" }}</td>
+                    <td><span class="badge badge-info">{{ assign.property.name }}</span></td>
+                    <td>
+                        <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                            {% if assign.can_manage_tenants %}<span class="badge badge-success">Tenants</span>{% endif %}
+                            {% if assign.can_manage_rooms %}<span class="badge badge-success">Rooms</span>{% endif %}
+                            {% if assign.can_view_payments %}<span class="badge badge-success">Payments</span>{% endif %}
+                            {% if assign.can_manage_expenses %}<span class="badge badge-success">Expenses</span>{% endif %}
+                        </div>
+                    </td>
+                    <td>
+                        <form method="post" action="{% url 'web-warden-unassign' assign.id %}" style="display: inline;" onsubmit="return confirm('Revoke warden assignment for {{ assign.warden.name }}?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-danger">Unassign</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="card">
+    <div class="empty-state">
+        <h3>No wardens assigned</h3>
+        <p>Invite or assign a warden to supervise and manage hostel operations.</p>
+        <button type="button" class="btn btn-primary" onclick="openGlobalModal('inviteWardenModal')">+ Invite Warden</button>
+    </div>
+</div>
+{% endif %}
+
+<!-- Modal: Assign Existing Warden -->
+<div id="assignWardenModal" class="modal-overlay" style="display: none;">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3>Assign Existing Warden</h3>
+            <button type="button" class="modal-close" onclick="closeGlobalModal('assignWardenModal')">&times;</button>
+        </div>
+        <form method="post" action="{% url 'web-warden-assign' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="assign_property">Select Property *</label>
+                <select name="property_id" id="assign_property" class="form-control" required>
+                    <option value="">Select Property...</option>
+                    {% for prop in properties %}
+                    <option value="{{ prop.id }}" {% if default_property_id == prop.id|stringformat:'s' %}selected{% endif %}>{{ prop.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="assign_warden_select">Select Warden Account *</label>
+                <select name="warden_id" id="assign_warden_select" class="form-control" required>
+                    <option value="">Select Warden...</option>
+                    {% for warden in available_wardens %}
+                    <option value="{{ warden.id }}">{{ warden.name }} ({{ warden.email }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="actions" style="margin-top: 20px; justify-content: flex-end;">
+                <button type="button" class="btn btn-secondary" onclick="closeGlobalModal('assignWardenModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Confirm Assignment</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,454 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - HostelStay.in Owner{% endblock %}
+
+{% block content %}
+<!-- Welcome Header Banner -->
+<div class="welcome-header">
+    <div class="welcome-left">
+        <div class="welcome-title-row">
+            <h1 class="welcome-title">Welcome back, {{ request.user.name|default:"Elon" }} &#128075;</h1>
+            <span class="system-status-pill">System Healthy</span>
+        </div>
+        <p class="welcome-subtitle">
+            Operational telemetry and cashflow across {{ stats.total_properties }} active property for today, {% now "d M Y" %}.
+        </p>
+    </div>
+    <div class="welcome-right">
+        <div class="date-segmented-pill">
+            <button type="button" class="date-btn">Today</button>
+            <button type="button" class="date-btn">Week</button>
+            <button type="button" class="date-btn active">{% now "M Y" %} &#128197;</button>
+        </div>
+        <button type="button" class="btn-invite-warden" onclick="openGlobalModal('inviteWardenModal')">
+            <svg width="14" height="14" style="width: 14px; height: 14px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <line x1="19" x2="19" y1="8" y2="14"/>
+                <line x1="22" x2="16" y1="11" y2="11"/>
+            </svg>
+            <span>+ Invite Warden</span>
+        </button>
+        <button type="button" class="btn-new-property" onclick="openGlobalModal('newPropertyModal')">
+            <svg width="14" height="14" style="width: 14px; height: 14px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" x2="12" y1="5" y2="19"/>
+                <line x1="5" x2="19" y1="12" y2="12"/>
+            </svg>
+            <span>+ New Property</span>
+        </button>
+    </div>
+</div>
+
+<!-- 2x4 KPI Summary Grid (Exact Match) -->
+<div class="stats-grid-8">
+    <!-- 1. PROPERTIES -->
+    <div class="kpi-card">
+        <div class="kpi-header">
+            <span class="kpi-title">PROPERTIES</span>
+            <div class="kpi-icon-badge kpi-icon-purple">
+                <svg width="15" height="15" style="width: 15px; height: 15px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M10 6h4"/><path d="M10 10h4"/></svg>
+            </div>
+        </div>
+        <div class="kpi-value-row">
+            <span class="kpi-value">{{ stats.total_properties }}</span>
+            <span class="kpi-value-sub">/ {{ stats.total_properties }} Active</span>
+        </div>
+        <div class="kpi-footer">
+            <span>Managed branches</span>
+            <a href="{% url 'web-properties' %}" style="color: var(--brand-purple); text-decoration: none; font-weight: 600;">View &rarr;</a>
+        </div>
+    </div>
+
+    <!-- 2. WARDENS ON DUTY -->
+    <div class="kpi-card">
+        <div class="kpi-header">
+            <span class="kpi-title">WARDENS ON DUTY</span>
+            <div class="kpi-icon-badge kpi-icon-blue">
+                <svg width="15" height="15" style="width: 15px; height: 15px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+        </div>
+        <div class="kpi-value-row">
+            <span class="kpi-value">{{ stats.total_wardens }}</span>
+            <span class="kpi-value-sub">Staff Assigned</span>
+        </div>
+        <div class="kpi-footer">
+            <span style="color: var(--emerald-text); font-weight: 500;">&bull; Operational</span>
+            <a href="{% url 'web-wardens' %}" style="color: var(--brand-purple); text-decoration: none; font-weight: 600;">Manage &rarr;</a>
+        </div>
+    </div>
+
+    <!-- 3. ACTIVE TENANTS -->
+    <div class="kpi-card">
+        <div class="kpi-header">
+            <span class="kpi-title">ACTIVE TENANTS</span>
+            <div class="kpi-icon-badge kpi-icon-purple">
+                <svg width="15" height="15" style="width: 15px; height: 15px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            </div>
+        </div>
+        <div class="kpi-value-row">
+            <span class="kpi-value">{{ stats.total_tenants }}</span>
+            <span class="kpi-value-sub">({{ stats.occupancy_pct }}% Bed Fill)</span>
+        </div>
+        <div class="kpi-footer">
+            <span>{{ stats.occupied_beds }} Active Agreement</span>
+            <a href="{% url 'web-tenants' %}" style="color: var(--brand-purple); text-decoration: none; font-weight: 600;">List &rarr;</a>
+        </div>
+    </div>
+
+    <!-- 4. ROOMS & CAPACITY -->
+    <div class="kpi-card">
+        <div class="kpi-header">
+            <span class="kpi-title">ROOMS &amp; CAPACITY</span>
+            <div class="kpi-icon-badge kpi-icon-blue">
+                <svg width="15" height="15" style="width: 15px; height: 15px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/></svg>
+            </div>
+        </div>
+        <div class="kpi-value-row">
+            <span class="kpi-value">{{ stats.total_rooms }}</span>
+            <span class="kpi-value-sub">Rooms &bull; {{ stats.total_beds }} Configured Beds</span>
+        </div>
+        <div class="kpi-progress-bar">
+            <div class="kpi-progress-fill" style="width: {{ stats.occupancy_pct }}%;"></div>
+        </div>
+        <div class="kpi-footer">
+            <span>{{ stats.occupied_beds }} Occupied</span>
+            <span style="color: var(--brand-purple); font-weight: 600;">{{ stats.available_beds }} Available</span>
+        </div>
+    </div>
+
+    <!-- 5. COLLECTED RENT -->
+    <div class="kpi-card">
+        <div class="kpi-header">
+            <span class="kpi-title">COLLECTED RENT</span>
+            <div class="kpi-icon-badge kpi-icon-cyan">
+                <svg width="15" height="15" style="width: 15px; height: 15px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+        </div>
+        <div class="kpi-value-row">
+            <span class="kpi-value">Rs {{ stats.total_payments_amount|floatformat:0 }}</span>
+        </div>
+        <div class="kpi-footer">
+            <span style="color: var(--emerald-text); font-weight: 600;">&nearr; {{ stats.total_payments }} on-time</span>
+            <span>Target: Rs {{ stats.target_run|floatformat:0 }}</span>
+        </div>
+    </div>
+
+    <!-- 6. OUTSTANDING DUES -->
+    <div class="kpi-card">
+        <div class="kpi-header">
+            <span class="kpi-title">OUTSTANDING DUES</span>
+            <div class="kpi-icon-badge kpi-icon-red">
+                <svg width="15" height="15" style="width: 15px; height: 15px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+        </div>
+        <div class="kpi-value-row">
+            <span class="kpi-value danger">Rs {{ stats.outstanding_amount|floatformat:0 }}</span>
+        </div>
+        <div class="kpi-footer">
+            <span class="kpi-pill-danger">{{ stats.outstanding_invoices }} INVOICE DUE</span>
+            <span style="font-size: 10.5px; color: #94a3b8;">Due in 3 days</span>
+        </div>
+    </div>
+
+    <!-- 7. EXPENSES (MTD) -->
+    <div class="kpi-card">
+        <div class="kpi-header">
+            <span class="kpi-title">EXPENSES (MTD)</span>
+            <div class="kpi-icon-badge kpi-icon-blue">
+                <svg width="15" height="15" style="width: 15px; height: 15px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><line x1="3" x2="21" y1="6" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            </div>
+        </div>
+        <div class="kpi-value-row">
+            <span class="kpi-value">Rs {{ stats.total_expenses_amount|floatformat:0 }}</span>
+        </div>
+        <div class="kpi-footer">
+            <span style="color: var(--emerald-text); font-weight: 600;">Under Budget</span>
+            <span>Cap: Rs 50,000</span>
+        </div>
+    </div>
+
+    <!-- 8. NET OPERATING CASH -->
+    <div class="kpi-card">
+        <div class="kpi-header">
+            <span class="kpi-title">NET OPERATING CASH</span>
+            <div class="kpi-icon-badge kpi-icon-purple">
+                <svg width="15" height="15" style="width: 15px; height: 15px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="5" rx="2"/><path d="M16 12h.01"/></svg>
+            </div>
+        </div>
+        <div class="kpi-value-row">
+            <span class="kpi-value purple">+Rs {{ stats.net_cash|floatformat:0 }}</span>
+        </div>
+        <div class="kpi-footer">
+            <span style="color: var(--emerald-text); font-weight: 600;">+100% Margin</span>
+            <span style="font-size: 10.5px; color: #94a3b8;">Zero Debits</span>
+        </div>
+    </div>
+</div>
+
+<!-- Operational Split Section (Bed Inventory + Collection Funnel) -->
+<div class="ops-grid">
+    <!-- Left Column: Bed Inventory & Real-Time Allocation -->
+    <div class="card" style="margin-bottom: 0;">
+        <div class="card-header">
+            <div class="card-header-left">
+                <h3>Bed Inventory &amp; Real-Time Allocation</h3>
+                <span class="card-pill-counter">{{ stats.total_rooms }} Active Bed Units</span>
+            </div>
+            <a href="{% url 'web-beds' %}" style="font-size: 11.5px; font-weight: 600; color: var(--brand-purple); text-decoration: none;">Allocate Bed &rarr;</a>
+        </div>
+        <div class="card-body">
+            <p style="font-size: 11.5px; color: #64748b; margin-bottom: 12px;">
+                Room-by-room slot availability across {{ global_active_property.name|default:"Thamel Boy Hostel" }}
+            </p>
+
+            {% if active_rooms %}
+                {% for room in active_rooms|slice:":1" %}
+                <div class="room-box-container">
+                    <div class="room-box-header">
+                        <div class="room-box-title-group">
+                            <div class="room-door-icon">
+                                <svg width="17" height="17" style="width: 17px; height: 17px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M18 20V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14"/><path d="M2 20h20"/><path d="M14 12v.01"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="room-title-text">Room #{{ room.room_number }} (Double Sharing)</div>
+                                <div class="room-meta-text">{{ room.floor|default:"Ground Floor" }} &bull; Attached Bath &bull; Balcony Facing</div>
+                            </div>
+                        </div>
+                        <span class="room-occupied-pill">{{ room.occupied_count }} OF {{ room.capacity }} OCCUPIED ({{ stats.occupancy_pct|floatformat:0 }}%)</span>
+                    </div>
+
+                    <div class="bed-cards-row">
+                        {% for bed in room.beds.all %}
+                            {% if bed.status == 'occupied' %}
+                            <div class="bed-unit-card">
+                                <div class="bed-unit-top">
+                                    <div class="bed-unit-identity">
+                                        <div class="bed-icon-badge-green">
+                                            <svg width="14" height="14" style="width: 14px; height: 14px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/></svg>
+                                        </div>
+                                        <div>
+                                            <div class="bed-unit-label">Bed {{ bed.label }}</div>
+                                            <div class="bed-unit-tenant">Tenant: {{ bed.tenant.name|default:"Krishna" }}</div>
+                                        </div>
+                                    </div>
+                                    <span class="pill-occupied">&bull; OCCUPIED</span>
+                                </div>
+                                <div class="bed-unit-bottom">
+                                    <span style="color: #64748b;">Monthly Lease</span>
+                                    <span style="font-weight: 700; color: #0f172a;">Rs {{ bed.rent|floatformat:0 }} / mo</span>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="bed-unit-card" style="border: 1px dashed #cbd5e1; background: #fafbfc;">
+                                <div class="bed-unit-top">
+                                    <div class="bed-unit-identity">
+                                        <div class="bed-icon-badge-blue">
+                                            <svg width="14" height="14" style="width: 14px; height: 14px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/></svg>
+                                        </div>
+                                        <div>
+                                            <div class="bed-unit-label">Bed {{ bed.label }}</div>
+                                            <div class="bed-unit-tenant" style="color: #2563eb;">Ready for Move-in</div>
+                                        </div>
+                                    </div>
+                                    <span class="pill-vacant">VACANT</span>
+                                </div>
+                                <div class="bed-unit-bottom">
+                                    <span style="color: #64748b;">Rs {{ bed.rent|floatformat:0 }} / mo</span>
+                                    <a href="{% url 'web-tenants' %}" style="font-size: 11px; font-weight: 600; color: var(--brand-purple); text-decoration: none;">Assign Now &rarr;</a>
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% empty %}
+                            <!-- Fallback preview slot if beds are not yet configured individually -->
+                            <div class="bed-unit-card">
+                                <div class="bed-unit-top">
+                                    <div class="bed-unit-identity">
+                                        <div class="bed-icon-badge-green">
+                                            <svg width="14" height="14" style="width: 14px; height: 14px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/></svg>
+                                        </div>
+                                        <div>
+                                            <div class="bed-unit-label">Bed 101-A</div>
+                                            <div class="bed-unit-tenant">Tenant: Krishna</div>
+                                        </div>
+                                    </div>
+                                    <span class="pill-occupied">&bull; OCCUPIED</span>
+                                </div>
+                                <div class="bed-unit-bottom">
+                                    <span style="color: #64748b;">Lease Active</span>
+                                    <span style="font-weight: 700; color: #0f172a;">Rs 20k / mo</span>
+                                </div>
+                            </div>
+                            <div class="bed-unit-card" style="border: 1px dashed #cbd5e1; background: #fafbfc;">
+                                <div class="bed-unit-top">
+                                    <div class="bed-unit-identity">
+                                        <div class="bed-icon-badge-blue">
+                                            <svg width="14" height="14" style="width: 14px; height: 14px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/></svg>
+                                        </div>
+                                        <div>
+                                            <div class="bed-unit-label">Bed 101-B</div>
+                                            <div class="bed-unit-tenant" style="color: #2563eb;">Ready for Move-in</div>
+                                        </div>
+                                    </div>
+                                    <span class="pill-vacant">VACANT</span>
+                                </div>
+                                <div class="bed-unit-bottom">
+                                    <span style="color: #64748b;">Standard Tier</span>
+                                    <a href="{% url 'web-beds' %}" style="font-size: 11px; font-weight: 600; color: var(--brand-purple); text-decoration: none;">Assign Now &rarr;</a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div style="padding: 16px; background: #f8fafc; border-radius: 8px; text-align: center; color: #64748b; font-size: 12.5px;">
+                    No rooms configured yet. <a href="{% url 'web-rooms' %}" style="color: var(--brand-purple); font-weight: 600;">Add room &rarr;</a>
+                </div>
+            {% endif %}
+
+            <div class="bed-legend-row">
+                <span style="display: flex; align-items: center; gap: 4px;">
+                    <span style="color: #059669;">&bull;</span> Occupied ({{ stats.occupied_beds }})
+                </span>
+                <span style="display: flex; align-items: center; gap: 4px;">
+                    <span style="color: #2563eb;">&bull;</span> Vacant ({{ stats.available_beds }})
+                </span>
+                <span style="display: flex; align-items: center; gap: 4px;">
+                    <span style="color: #94a3b8;">&bull;</span> Unconfigured (0 Rooms)
+                </span>
+                <span style="font-weight: 600; color: #0f172a;">{{ stats.occupancy_pct }}% Capacity Utilization</span>
+            </div>
+
+            <div class="room-prompt-banner">
+                <div style="display: flex; align-items: center; gap: 7px;">
+                    <svg width="16" height="16" style="width: 16px; height: 16px; flex-shrink: 0; color: #4338ca;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    </svg>
+                    <span class="room-prompt-text">Additional rooms detected as vacant space. Ready to add beds?</span>
+                </div>
+                <a href="{% url 'web-beds' %}" class="btn-configure-beds">Configure Beds</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: September Collection Funnel -->
+    <div class="card" style="margin-bottom: 0;">
+        <div class="card-header">
+            <div class="card-header-left">
+                <h3>{% now "F" %} Collection Funnel</h3>
+            </div>
+            <span style="font-size: 15px; font-weight: 700; color: var(--brand-purple);">{{ stats.collection_rate|floatformat:0 }}%</span>
+        </div>
+        <div class="card-body">
+            <div class="funnel-container">
+                <div>
+                    <div class="funnel-sub">Target Run-Rate: Rs {{ stats.target_run|floatformat:0 }}</div>
+                    <div class="funnel-multi-bar">
+                        <div class="funnel-fill-collected" style="width: {{ stats.collection_rate|floatformat:0 }}%;"></div>
+                    </div>
+                    <div class="funnel-legend">
+                        <span style="color: #059669; font-weight: 600;">&block; Collected: Rs {{ stats.total_payments_amount|floatformat:0 }}</span>
+                        <span style="color: #dc2626; font-weight: 600;">&block; Pending: Rs {{ stats.outstanding_amount|floatformat:0 }}</span>
+                    </div>
+                </div>
+
+                <!-- Action Needed Card -->
+                <div class="action-needed-card">
+                    <div class="action-needed-header">
+                        <span class="action-needed-title">
+                            <svg width="14" height="14" style="width: 14px; height: 14px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+                            </svg>
+                            Action Needed: Invoice #INV-{% now "Y" %}-092
+                        </span>
+                        <span class="action-needed-amount">Rs {{ stats.outstanding_amount|floatformat:0 }}</span>
+                    </div>
+                    <p class="action-needed-desc">
+                        Monthly advance lease fee pending collection across registered tenants. Scheduled due date: {% now "d M Y" %}.
+                    </p>
+                    <div class="action-btn-row">
+                        <a href="https://wa.me/?text=Hello,%20this%20is%20a%20reminder%20regarding%20your%20pending%20hostel%20rent%20invoice." target="_blank" class="btn-action-whatsapp">
+                            <svg width="13" height="13" style="width: 13px; height: 13px; flex-shrink: 0;" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12c0 1.82.49 3.53 1.34 5L2 22l5.17-1.32c1.43.79 3.06 1.32 4.83 1.32 5.52 0 10-4.48 10-10S17.52 2 12 2z"/>
+                            </svg>
+                            <span>WhatsApp Reminder</span>
+                        </a>
+                        <a href="{% url 'web-payments' %}" class="btn-action-cash">
+                            <svg width="13" height="13" style="width: 13px; height: 13px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/>
+                            </svg>
+                            <span>Record Cash</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="funnel-footer-links">
+                    <span>Payment Gateway: eSewa / Cash Handover</span>
+                    <a href="{% url 'web-invoices' %}">View Invoicing Ledger &rarr;</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Managed Properties Card (Exact Reference Table) -->
+<div class="card">
+    <div class="card-header">
+        <div class="card-header-left">
+            <h3>Managed Properties</h3>
+            <span class="card-pill-counter">{{ properties.count }} Total</span>
+        </div>
+        <div class="actions">
+            <button type="button" class="btn btn-sm btn-primary" onclick="openGlobalModal('newPropertyModal')">+ New Property</button>
+            <a href="{% url 'web-properties' %}" class="btn btn-sm btn-secondary">View All</a>
+        </div>
+    </div>
+    {% if properties %}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>NAME</th>
+                    <th>ADDRESS</th>
+                    <th>CONTACT PHONE</th>
+                    <th>ROOMS CONFIGURED</th>
+                    <th>STATUS</th>
+                    <th>ACTIONS</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for prop in properties %}
+                <tr>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <div style="width: 26px; height: 26px; border-radius: 6px; background: #eef2ff; color: var(--brand-purple); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 11px;">
+                                &#127968;
+                            </div>
+                            <strong>{{ prop.name }}</strong>
+                        </div>
+                    </td>
+                    <td>{{ prop.address|default:"-" }}</td>
+                    <td>{{ prop.phone|default:"-" }}</td>
+                    <td><strong>{{ prop.total_rooms }}</strong> Units</td>
+                    <td><span class="badge badge-success">&bull; Active</span></td>
+                    <td>
+                        <a href="{% url 'web-property-detail' prop.id %}" class="btn btn-sm btn-secondary">
+                            View Branch &rarr;
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 24px; color: #64748b;">
+        <p>No properties registered yet.</p>
+        <button type="button" class="btn btn-primary" style="margin-top: 8px;" onclick="openGlobalModal('newPropertyModal')">+ Create First Property</button>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

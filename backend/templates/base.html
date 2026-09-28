@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}HostelStay.in - Owner Dashboard{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v={% now 'U' %}">
+    
+    <!-- Inline Critical Layout CSS to Guarantee Exact Rendering Even If External Static Is Cached -->
+    <style>
+        :root {
+            --bg-canvas: #f4f6fb;
+            --bg-card: #ffffff;
+            --border-card: #e5e9f2;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+            --brand-purple: #4f46e5;
+            --brand-purple-light: #eef2ff;
+            --brand-blue: #2563eb;
+            --emerald-text: #059669;
+            --rose-text: #dc2626;
+            --sidebar-width: 250px;
+            --header-height: 62px;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-canvas) !important;
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+        }
+        svg { max-width: 100%; flex-shrink: 0; vertical-align: middle; }
+        
+        .sidebar {
+            width: 250px !important;
+            background: #ffffff !important;
+            border-right: 1px solid var(--border-card) !important;
+            display: flex !important;
+            flex-direction: column !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            bottom: 0 !important;
+            height: 100vh !important;
+            z-index: 100 !important;
+            overflow-y: auto !important;
+        }
+        .sidebar-brand-wrapper {
+            padding: 16px 14px 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .sidebar-logo-box {
+            width: 36px;
+            height: 36px;
+            background: #0f172a;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            flex-shrink: 0;
+        }
+        .sidebar-brand-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #0f172a;
+            line-height: 1.2;
+        }
+        .sidebar-brand-subtitle {
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--brand-purple);
+            margin-top: 2px;
+        }
+        .sidebar-property-selector {
+            margin: 4px 12px 12px;
+            padding: 8px 11px;
+            background: #eef4ff;
+            border: 1px solid #d6e4ff;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+        .sidebar-group-heading {
+            padding: 12px 16px 4px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #94a3b8;
+        }
+        .sidebar-nav {
+            list-style: none;
+            padding: 0 8px;
+        }
+        .sidebar-nav li { margin-bottom: 2px; }
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 7px 11px;
+            border-radius: 8px;
+            color: #475569;
+            text-decoration: none;
+            font-size: 12.5px;
+            font-weight: 500;
+        }
+        .sidebar-nav a:hover {
+            background: #f1f5f9;
+            color: #0f172a;
+        }
+        .sidebar-nav a.active {
+            background: #dbeafe !important;
+            color: #1d4ed8 !important;
+            font-weight: 600 !important;
+        }
+        .sidebar-footer {
+            padding: 10px 12px;
+            margin: auto 10px 12px;
+            background: #f0f4fa;
+            border: 1px solid var(--border-card);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .top-header {
+            position: fixed;
+            top: 0;
+            left: 250px;
+            right: 0;
+            height: 62px;
+            background: #ffffff;
+            border-bottom: 1px solid var(--border-card);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 28px;
+            z-index: 90;
+        }
+        .main-content {
+            margin-left: 250px;
+            margin-top: 62px;
+            padding: 24px 28px 48px;
+            min-height: calc(100vh - 62px);
+        }
+        .main-content.full-width {
+            margin-left: 0;
+            margin-top: 0;
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .stats-grid-8 {
+            display: grid !important;
+            grid-template-columns: repeat(4, 1fr) !important;
+            gap: 14px !important;
+            margin-bottom: 20px !important;
+        }
+        .ops-grid {
+            display: grid !important;
+            grid-template-columns: 1.55fr 1fr !important;
+            gap: 16px !important;
+            margin-bottom: 20px !important;
+        }
+        .kpi-card {
+            background: #ffffff;
+            border: 1px solid var(--border-card);
+            border-radius: 12px;
+            padding: 15px 17px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+        }
+        .card {
+            background: #ffffff;
+            border: 1px solid var(--border-card);
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% if request.user.is_authenticated and request.user.is_owner or request.user.is_authenticated and request.user.is_staff %}
+    <!-- Left Navigation Sidebar -->
+    <aside class="sidebar">
+        <!-- Brand Header -->
+        <div class="sidebar-brand-wrapper">
+            <div class="sidebar-logo-box">
+                <svg width="20" height="20" style="width: 20px; height: 20px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 21h18"/>
+                    <path d="M9 8h1"/><path d="M9 12h1"/><path d="M9 16h1"/>
+                    <path d="M14 8h1"/><path d="M14 12h1"/><path d="M14 16h1"/>
+                    <path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"/>
+                </svg>
+            </div>
+            <div class="sidebar-brand-text">
+                <span class="sidebar-brand-title">HostelStay.In</span>
+                <span class="sidebar-brand-subtitle">HOSTEL &amp; COLIVING OS</span>
+            </div>
+        </div>
+
+        <!-- Property Selector Card -->
+        <div class="sidebar-property-selector" onclick="togglePropertyDropdown()">
+            <div class="property-selector-content">
+                <div class="property-selector-icon">
+                    <svg width="15" height="15" style="width: 15px; height: 15px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 21h18"/><path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"/>
+                    </svg>
+                </div>
+                <span class="property-selector-name">
+                    {% if global_active_property %}{{ global_active_property.name }}{% elif properties and properties.first %}{{ properties.first.name }}{% else %}Thamel Boy Hostel{% endif %}
+                </span>
+            </div>
+            <div class="property-selector-chevron">
+                <svg width="13" height="13" style="width: 13px; height: 13px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Property Dropdown Menu -->
+        <div id="propertyDropdownMenu" style="display: none; margin: -6px 12px 10px; background: #ffffff; border: 1px solid var(--border-card); border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08); padding: 5px; z-index: 50;">
+            <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #94a3b8; padding: 4px 8px;">Select Property</div>
+            {% for prop in global_properties %}
+            <a href="?property_id={{ prop.id }}" style="display: flex; align-items: center; justify-content: space-between; padding: 5px 8px; font-size: 12px; color: #334155; text-decoration: none; border-radius: 4px;">
+                <span>{{ prop.name }}</span>
+                {% if global_active_property and global_active_property.id == prop.id %}<span style="color: var(--brand-purple); font-weight: 700;">&check;</span>{% endif %}
+            </a>
+            {% empty %}
+            <div style="font-size: 11px; color: #94a3b8; padding: 4px 8px;">No branches added</div>
+            {% endfor %}
+            <div style="border-top: 1px solid #f1f5f9; margin-top: 4px; padding-top: 4px;">
+                <a href="{% url 'web-properties' %}" style="display: block; font-size: 11px; font-weight: 600; color: var(--brand-purple); text-decoration: none; padding: 4px 8px;">+ Manage Properties</a>
+            </div>
+        </div>
+
+        <!-- Nav Links -->
+        <div class="sidebar-nav-container">
+            <!-- Group 1: Operations -->
+            <div class="sidebar-group-heading">OPERATIONS</div>
+            <ul class="sidebar-nav">
+                <li>
+                    <a href="{% url 'web-dashboard' %}" class="{% if request.resolver_match.url_name == 'web-dashboard' %}active{% endif %}">
+                        <svg width="17" height="17" style="width: 17px; height: 17px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                            <rect width="7" height="9" x="3" y="3" rx="1"/>
+                            <rect width="7" height="5" x="14" y="3" rx="1"/>
+                            <rect width="7" height="9" x="14" y="12" rx="1"/>
+                            <rect width="7" height="5" x="3" y="16" rx="1"/>
+                        </svg>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'web-properties' %}" class="{% if 'properties' in request.path %}active{% endif %}">
+                        <svg width="17" height="17" style="width: 17px; height: 17px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/>
+                            <path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/>
+                        </svg>
+                        <span>Properties</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'web-rooms' %}" class="{% if 'rooms' in request.path or 'beds' in request.path %}active{% endif %}">
+                        <svg width="17" height="17" style="width: 17px; height: 17px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/>
+                        </svg>
+                        <span>Rooms &amp; Beds</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'web-tenants' %}" class="{% if 'tenants' in request.path %}active{% endif %}">
+                        <svg width="17" height="17" style="width: 17px; height: 17px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                        </svg>
+                        <span>Tenants &amp; Bookings</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'web-wardens' %}" class="{% if 'wardens' in request.path %}active{% endif %}">
+                        <svg width="17" height="17" style="width: 17px; height: 17px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>
+                        </svg>
+                        <span>Wardens &amp; Staff</span>
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Group 2: Finance & Utility -->
+            <div class="sidebar-group-heading">FINANCE &amp; UTILITY</div>
+            <ul class="sidebar-nav">
+                <li>
+                    <a href="{% url 'web-payments' %}" class="{% if 'payments' in request.path %}active{% endif %}">
+                        <svg width="17" height="17" style="width: 17px; height: 17px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                            <rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/>
+                        </svg>
+                        <span>Payments &amp; Collection</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'web-invoices' %}" class="{% if 'invoices' in request.path or 'expenses' in request.path %}active{% endif %}">
+                        <svg width="17" height="17" style="width: 17px; height: 17px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+                        </svg>
+                        <span>Expenses &amp; Invoices</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'web-security-deposits' %}" class="{% if 'security-deposits' in request.path %}active{% endif %}">
+                        <svg width="17" height="17" style="width: 17px; height: 17px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                            <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                        </svg>
+                        <span>Security Deposits</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'web-utilities' %}" class="{% if 'utilities' in request.path %}active{% endif %}">
+                        <svg width="17" height="17" style="width: 17px; height: 17px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                        </svg>
+                        <span>Utilities &amp; Electricity</span>
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Group 3: Facility & Audit -->
+            <div class="sidebar-group-heading">FACILITY &amp; AUDIT</div>
+            <ul class="sidebar-nav">
+                <li>
+                    <a href="{% url 'web-meals' %}" class="{% if 'meals' in request.path %}active{% endif %}">
+                        <svg width="17" height="17" style="width: 17px; height: 17px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" x2="6" y1="1" y2="4"/>
+                        </svg>
+                        <span>Meals &amp; Mess Menu</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'web-maintenance' %}" class="{% if 'maintenance' in request.path %}active{% endif %}">
+                        <svg width="17" height="17" style="width: 17px; height: 17px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                        </svg>
+                        <span>Maintenance &amp; Complaints</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'web-reports' %}" class="{% if 'reports' in request.path %}active{% endif %}">
+                        <svg width="17" height="17" style="width: 17px; height: 17px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" x2="12" y1="20" y2="10"/><line x1="18" x2="18" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="16"/>
+                        </svg>
+                        <span>Reports &amp; Analytics</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'web-activity' %}" class="{% if 'activity' in request.path %}active{% endif %}">
+                        <svg width="17" height="17" style="width: 17px; height: 17px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                        <span>Activity Audit Log</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Sidebar User Footer -->
+        <div class="sidebar-footer">
+            <div class="sidebar-user-info">
+                <div class="sidebar-avatar-circle">
+                    <svg width="16" height="16" style="width: 16px; height: 16px; flex-shrink: 0;" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                </div>
+                <div class="sidebar-user-text">
+                    <span class="sidebar-user-name">{{ request.user.name|default:"Elon" }} (Owner)</span>
+                    <span class="sidebar-user-plan">Pro Plan</span>
+                </div>
+            </div>
+            <a href="{% url 'web-logout' %}" class="sidebar-logout-icon" title="Sign Out">
+                <svg width="15" height="15" style="width: 15px; height: 15px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/>
+                </svg>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Top Header Bar -->
+    <header class="top-header">
+        <div class="header-left">
+            <span class="portal-pill">OWNER PORTAL</span>
+            <div class="header-search-box">
+                <div class="header-search-icon">
+                    <svg width="14" height="14" style="width: 14px; height: 14px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/>
+                    </svg>
+                </div>
+                <input type="text" id="globalSearchInput" class="header-search-input" placeholder="Search properties, tenants, rooms, bills...">
+                <kbd class="header-search-kbd">Cmd + K</kbd>
+            </div>
+        </div>
+
+        <div class="header-right">
+            <button type="button" class="btn-header-new-prop" onclick="openGlobalModal('newPropertyModal')">
+                <svg width="13" height="13" style="width: 13px; height: 13px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
+                <span>+ New Property</span>
+            </button>
+
+            <div style="position: relative;">
+                <button type="button" class="btn-header-quick-add" onclick="toggleQuickAddMenu()">
+                    <svg width="13" height="13" style="width: 13px; height: 13px; flex-shrink: 0;" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    <span>Quick Add</span>
+                    <svg width="11" height="11" style="width: 11px; height: 11px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
+                <div id="quickAddMenu" style="display: none; position: absolute; right: 0; top: calc(100% + 6px); background: #ffffff; border: 1px solid var(--border-card); border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); min-width: 180px; padding: 5px; z-index: 100;">
+                    <a href="javascript:void(0)" onclick="openGlobalModal('newPropertyModal'); toggleQuickAddMenu();" style="display: block; padding: 6px 10px; font-size: 12px; color: #334155; text-decoration: none; border-radius: 4px;">+ New Property</a>
+                    <a href="javascript:void(0)" onclick="openGlobalModal('inviteWardenModal'); toggleQuickAddMenu();" style="display: block; padding: 6px 10px; font-size: 12px; color: #334155; text-decoration: none; border-radius: 4px;">+ Invite Warden</a>
+                    <a href="{% url 'web-tenants' %}" style="display: block; padding: 6px 10px; font-size: 12px; color: #334155; text-decoration: none; border-radius: 4px;">&rarr; View Tenants</a>
+                    <a href="{% url 'web-payments' %}" style="display: block; padding: 6px 10px; font-size: 12px; color: #334155; text-decoration: none; border-radius: 4px;">&rarr; Record Cash</a>
+                </div>
+            </div>
+
+            <button type="button" class="header-bell-btn" title="Notifications">
+                <svg width="16" height="16" style="width: 16px; height: 16px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+                </svg>
+                <span class="header-bell-badge">3</span>
+            </button>
+
+            <div class="header-user-badge-box">
+                <div class="header-user-meta">
+                    <span class="header-user-title">{{ request.user.name|default:"Elon" }}</span>
+                    <span class="header-user-role">Active Owner</span>
+                </div>
+                <div class="header-avatar-circle">
+                    <svg width="16" height="16" style="width: 16px; height: 16px; flex-shrink: 0;" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </header>
+    {% endif %}
+
+    <!-- Main Content Area -->
+    <main class="main-content {% if not request.user.is_authenticated %}full-width{% endif %}">
+        {% if messages %}
+        <div class="messages" style="margin-bottom: 16px;">
+            {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}error{% elif message.tags == 'success' %}success{% else %}{{ message.tags }}{% endif %}" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 8px; font-size: 12.5px; margin-bottom: 8px; background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0;">
+                <span>{{ message }}</span>
+                <button class="alert-close" onclick="this.parentElement.remove()" style="background: none; border: none; font-size: 16px; cursor: pointer; color: inherit;">&times;</button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Global Modal: New Property -->
+    <div id="newPropertyModal" class="modal-overlay" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Add New Property</h3>
+                <button type="button" class="modal-close" onclick="closeGlobalModal('newPropertyModal')">&times;</button>
+            </div>
+            <form method="post" action="{% url 'web-property-create' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="id_name">Property Name *</label>
+                    <input type="text" name="name" id="id_name" class="form-control" placeholder="e.g. Thamel Boy Hostel" required>
+                </div>
+                <div class="form-group">
+                    <label for="id_address">Address</label>
+                    <input type="text" name="address" id="id_address" class="form-control" placeholder="e.g. Thamel, Kathmandu">
+                </div>
+                <div class="form-group">
+                    <label for="id_phone">Contact Phone</label>
+                    <input type="text" name="phone" id="id_phone" class="form-control" placeholder="e.g. 9807778303">
+                </div>
+                <div class="form-group">
+                    <label for="id_email">Email</label>
+                    <input type="email" name="email" id="id_email" class="form-control" placeholder="e.g. contact@hostelstay.in">
+                </div>
+                <div class="form-group">
+                    <label for="id_total_rooms">Total Rooms</label>
+                    <input type="number" name="total_rooms" id="id_total_rooms" class="form-control" placeholder="e.g. 10" value="10" min="1">
+                </div>
+                <div class="form-group">
+                    <label for="id_description">Description</label>
+                    <textarea name="description" id="id_description" class="form-control" rows="2" placeholder="Brief notes about property..."></textarea>
+                </div>
+                <div class="actions" style="margin-top: 16px; justify-content: flex-end;">
+                    <button type="button" class="btn btn-secondary" onclick="closeGlobalModal('newPropertyModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Property</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Global Modal: Invite Warden -->
+    <div id="inviteWardenModal" class="modal-overlay" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Invite &amp; Assign Warden</h3>
+                <button type="button" class="modal-close" onclick="closeGlobalModal('inviteWardenModal')">&times;</button>
+            </div>
+            <form method="post" action="{% url 'web-warden-invite' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="warden_property_select">Assign to Property *</label>
+                    <select name="property_id" id="warden_property_select" class="form-control" required>
+                        <option value="">Select Property...</option>
+                        {% for prop in global_properties %}
+                        <option value="{{ prop.id }}" {% if global_active_property and global_active_property.id == prop.id %}selected{% endif %}>{{ prop.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="warden_name_input">Warden Full Name *</label>
+                    <input type="text" name="name" id="warden_name_input" class="form-control" placeholder="e.g. Ram Bahadur Thapa" required>
+                </div>
+                <div class="form-group">
+                    <label for="warden_email_input">Email Address *</label>
+                    <input type="email" name="email" id="warden_email_input" class="form-control" placeholder="e.g. warden@hostelstay.in" required>
+                </div>
+                <div class="form-group">
+                    <label for="warden_phone_input">Phone Number</label>
+                    <input type="text" name="phone" id="warden_phone_input" class="form-control" placeholder="e.g. 9801234567">
+                </div>
+                <div class="form-group">
+                    <label for="warden_password_input">Initial Password *</label>
+                    <input type="password" name="password" id="warden_password_input" class="form-control" placeholder="Temporary login password" required>
+                </div>
+                <div class="actions" style="margin-top: 16px; justify-content: flex-end;">
+                    <button type="button" class="btn btn-secondary" onclick="closeGlobalModal('inviteWardenModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Invite Warden</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="{% static 'js/app.js' %}"></script>
+    <script>
+        function openGlobalModal(id) {
+            var el = document.getElementById(id);
+            if (el) el.style.display = 'flex';
+        }
+        function closeGlobalModal(id) {
+            var el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        }
+        function togglePropertyDropdown() {
+            var menu = document.getElementById('propertyDropdownMenu');
+            if (menu) {
+                menu.style.display = (menu.style.display === 'none' || menu.style.display === '') ? 'block' : 'none';
+            }
+        }
+        function toggleQuickAddMenu() {
+            var menu = document.getElementById('quickAddMenu');
+            if (menu) {
+                menu.style.display = (menu.style.display === 'none' || menu.style.display === '') ? 'block' : 'none';
+            }
+        }
+        window.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal-overlay')) {
+                e.target.style.display = 'none';
+            }
+            var quickMenu = document.getElementById('quickAddMenu');
+            var quickBtn = document.querySelector('.btn-header-quick-add');
+            if (quickMenu && quickBtn && !quickMenu.contains(e.target) && !quickBtn.contains(e.target)) {
+                quickMenu.style.display = 'none';
+            }
+            var propMenu = document.getElementById('propertyDropdownMenu');
+            var propBtn = document.querySelector('.sidebar-property-selector');
+            if (propMenu && propBtn && !propMenu.contains(e.target) && !propBtn.contains(e.target)) {
+                propMenu.style.display = 'none';
+            }
+        });
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                var s = document.getElementById('globalSearchInput');
+                if (s) s.focus();
+            }
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

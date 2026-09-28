@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Tenants - HostelStay.in Owner{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-header-left">
+        <div class="page-title-row">
+            <h1 class="page-title">Active Residents &amp; Tenants</h1>
+            <span class="system-status-badge">{{ tenants.count }} Active</span>
+        </div>
+        <p class="page-subtitle">Roster of active residents across all managed properties</p>
+    </div>
+</div>
+
+{% if tenants %}
+<div class="card">
+    <div class="card-header">
+        <div class="card-header-left">
+            <h3>Resident Directory</h3>
+            <span class="card-header-badge">{{ tenants.count }} Total</span>
+        </div>
+    </div>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>NAME</th>
+                    <th>BRANCH</th>
+                    <th>ROOM / BED</th>
+                    <th>PHONE</th>
+                    <th>MOVE-IN DATE</th>
+                    <th>STATUS</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in tenants %}
+                <tr>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 9px;">
+                            <div style="width: 32px; height: 32px; border-radius: var(--radius-full); background: var(--brand-blue-light); color: var(--brand-blue); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px;">
+                                {{ t.name|slice:":1"|upper }}
+                            </div>
+                            <div>
+                                <strong>{{ t.name }}</strong>
+                                {% if t.email %}
+                                <div style="font-size: 11.5px; color: var(--slate-400);">{{ t.email }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </td>
+                    <td>{{ t.pg.name }}</td>
+                    <td>
+                        <span class="badge badge-secondary">
+                            Room {{ t.room.room_number|default:"-" }} / Bed {{ t.bed.label|default:"-" }}
+                        </span>
+                    </td>
+                    <td>{{ t.phone|default:"-" }}</td>
+                    <td style="color: var(--slate-500);">{{ t.move_in_date|date:"M d, Y"|default:"-" }}</td>
+                    <td>
+                        <span class="badge badge-{% if t.status == 'active' %}success{% else %}warning{% endif %}">
+                            {{ t.status|title }}
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="card">
+    <div class="empty-state">
+        <h3>No tenants enrolled yet</h3>
+        <p>Tenant check-ins and bookings will appear in this directory.</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

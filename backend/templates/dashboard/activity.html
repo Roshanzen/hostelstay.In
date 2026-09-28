@@ -1,0 +1,746 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Activity &amp; Audit Trail - HostelStay.in Owner{% endblock %}
+
+{% block content %}
+<style>
+    .activity-header-row {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 22px;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+    .activity-title-group {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+    }
+    .activity-breadcrumb {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #64748b;
+        margin-bottom: 1px;
+    }
+    .activity-breadcrumb span {
+        color: #4f46e5;
+    }
+    .activity-title-line {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .telemetry-status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5.5px;
+        background: #ecfdf5;
+        border: 1px solid #a7f3d0;
+        color: #059669;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 3px 9px;
+        border-radius: 9999px;
+    }
+    .telemetry-pulse-dot {
+        width: 6.5px;
+        height: 6.5px;
+        border-radius: 50%;
+        background: #10b981;
+        box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+    }
+    .activity-actions-col {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    .act-header-select {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 6.5px 12px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #1e293b;
+        cursor: pointer;
+        outline: none;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+        transition: all 0.15s ease;
+    }
+    .act-header-select:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+    }
+    .btn-export-black {
+        background: #000000;
+        color: #ffffff;
+        border: none;
+        border-radius: 8px;
+        padding: 6.5px 14px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6.5px;
+        cursor: pointer;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+        transition: all 0.15s ease;
+    }
+    .btn-export-black:hover {
+        background: #1e293b;
+    }
+
+    /* 4 KPI Telemetry Cards */
+    .act-kpi-grid {
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 16px !important;
+        margin-bottom: 22px !important;
+    }
+    .act-kpi-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 16px 18px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+        min-height: 124px;
+    }
+    .act-kpi-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 6px;
+    }
+    .act-kpi-label {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: capitalize;
+        letter-spacing: 0.02em;
+        color: #64748b;
+    }
+    .act-kpi-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 7px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .act-kpi-middle {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        margin: 2px 0 8px;
+    }
+    .act-kpi-val {
+        font-size: 24px;
+        font-weight: 700;
+        color: #0f172a;
+        letter-spacing: -0.02em;
+        line-height: 1.1;
+    }
+    .act-pill-delta {
+        background: #ecfdf5;
+        border: 1px solid #a7f3d0;
+        color: #059669;
+        font-size: 10.5px;
+        font-weight: 700;
+        padding: 1px 6.5px;
+        border-radius: 9999px;
+        display: inline-flex;
+        align-items: center;
+        gap: 2px;
+    }
+    .act-kpi-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 11px;
+        color: #64748b;
+        margin-top: auto;
+        padding-top: 4px;
+    }
+
+    /* Filter & Search Section */
+    .act-filter-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin-bottom: 20px;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+    }
+    .act-search-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .act-search-wrap {
+        position: relative;
+        flex: 1;
+        min-width: 280px;
+    }
+    .act-search-icon {
+        position: absolute;
+        left: 11px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        pointer-events: none;
+    }
+    .act-search-input {
+        width: 100%;
+        height: 38px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 0 12px 0 34px;
+        font-size: 12.5px;
+        color: #0f172a;
+        outline: none;
+        transition: all 0.15s ease;
+    }
+    .act-search-input:focus {
+        background: #ffffff;
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+    .act-ctrl-select {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        height: 38px;
+        padding: 0 10px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #334155;
+        outline: none;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .act-ctrl-select:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+    }
+    .act-ctrl-btn {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        height: 38px;
+        padding: 0 10px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #334155;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .act-ctrl-btn:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+    }
+
+    /* Tab Pills */
+    .act-tabs-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 14px;
+        flex-wrap: wrap;
+    }
+    .act-tab-pill {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 9999px;
+        padding: 5px 12px;
+        font-size: 11.5px;
+        font-weight: 600;
+        color: #475569;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .act-tab-pill:hover {
+        background: #f8fafc;
+        color: #0f172a;
+    }
+    .act-tab-pill.active {
+        background: #2563eb;
+        border-color: #2563eb;
+        color: #ffffff;
+        box-shadow: 0 1px 2px rgba(37, 99, 235, 0.25);
+    }
+
+    /* Action Type Badges */
+    .pill-act {
+        display: inline-flex;
+        align-items: center;
+        gap: 5.5px;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 3px 8.5px;
+        border-radius: 9999px;
+        white-space: nowrap;
+    }
+    .pill-act-payment {
+        background: #ecfdf5;
+        border: 1px solid #a7f3d0;
+        color: #059669;
+    }
+    .pill-act-invoice {
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        color: #2563eb;
+    }
+    .pill-act-ticket {
+        background: #f5f3ff;
+        border: 1px solid #ddd6fe;
+        color: #6d28d9;
+    }
+    .pill-act-expense {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #dc2626;
+    }
+    .pill-act-tenant {
+        background: #e0f2fe;
+        border: 1px solid #bae6fd;
+        color: #0284c7;
+    }
+    .pill-act-warden {
+        background: #eef2ff;
+        border: 1px solid #c7d2fe;
+        color: #4338ca;
+    }
+
+    .dot-payment { width: 5.5px; height: 5.5px; border-radius: 50%; background: #10b981; }
+    .dot-invoice { width: 5.5px; height: 5.5px; border-radius: 50%; background: #3b82f6; }
+    .dot-ticket { width: 5.5px; height: 5.5px; border-radius: 50%; background: #8b5cf6; }
+    .dot-expense { width: 5.5px; height: 5.5px; border-radius: 50%; background: #ef4444; }
+    .dot-tenant { width: 5.5px; height: 5.5px; border-radius: 50%; background: #0284c7; }
+    .dot-warden { width: 5.5px; height: 5.5px; border-radius: 50%; background: #6366f1; }
+
+    /* Table Typography */
+    .audit-table th {
+        font-size: 10.5px !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.05em !important;
+        text-transform: uppercase !important;
+        color: #64748b !important;
+        background: #f8fafc !important;
+        padding: 11px 14px !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+    }
+    .audit-table td {
+        padding: 13px 14px !important;
+        font-size: 12.5px !important;
+        vertical-align: middle !important;
+        border-bottom: 1px solid #f1f5f9 !important;
+    }
+    .audit-table tr:hover td {
+        background: #fafbfc;
+    }
+
+    @media (max-width: 1100px) {
+        .act-kpi-grid { grid-template-columns: repeat(2, 1fr) !important; }
+    }
+    @media (max-width: 650px) {
+        .act-kpi-grid { grid-template-columns: 1fr !important; }
+        .activity-header-row { flex-direction: column; align-items: flex-start; }
+    }
+</style>
+
+<!-- Header & Controls -->
+<div class="activity-header-row">
+    <div class="activity-title-group">
+        <div class="activity-breadcrumb">
+            OPERATIONS &rsaquo; <span>AUDIT &amp; COMPLIANCE</span>
+        </div>
+        <div class="activity-title-line">
+            <h1 style="font-size: 22px; font-weight: 700; color: #0f172a; letter-spacing: -0.02em;">Activity &amp; Audit Trail</h1>
+            <span class="telemetry-status-pill">
+                <span class="telemetry-pulse-dot"></span>
+                Live Telemetry Active &bull; Auto-syncing
+            </span>
+        </div>
+        <p style="font-size: 13px; color: #64748b; margin-top: 2px;">
+            Live chronological telemetry ledger tracking tenant operations, financial receipts, maintenance events, and warden actions.
+        </p>
+    </div>
+
+    <!-- Dynamic Header Controls -->
+    <div class="activity-actions-col">
+        <!-- Dynamic Property Selector -->
+        <select class="act-header-select" onchange="window.location.href='?pg=' + this.value + '{% if selected_month %}&month={{ selected_month }}{% endif %}'">
+            <option value="" {% if not selected_property_id %}selected{% endif %}>
+                All Branches ({{ owner_properties|length }})
+            </option>
+            {% for p in owner_properties %}
+            <option value="{{ p.id }}" {% if selected_property_id == p.id|stringformat:"s" %}selected{% endif %}>
+                {{ p.name }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <!-- Dynamic Month Selector -->
+        <select class="act-header-select" onchange="window.location.href='?month=' + this.value + '{% if selected_property_id %}&pg={{ selected_property_id }}{% endif %}'">
+            <option value="" {% if not selected_month %}selected{% endif %}>All Time</option>
+            {% for m in available_months %}
+            <option value="{{ m.value }}" {% if selected_month == m.value %}selected{% endif %}>
+                {{ m.label }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <button type="button" class="btn-export-black" onclick="window.print()">
+            <svg width="13" height="13" style="width: 13px; height: 13px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+            <span>Export Audit Log</span>
+        </button>
+    </div>
+</div>
+
+<!-- 4 Telemetry KPI Cards (100% Dynamic from Database) -->
+<div class="act-kpi-grid">
+    <!-- 1. Total Events Recorded -->
+    <div class="act-kpi-card">
+        <div class="act-kpi-top">
+            <span class="act-kpi-label">Total Events Recorded</span>
+            <div class="act-kpi-icon" style="background: #eef2ff; color: #6366f1;">
+                <svg width="14" height="14" style="width: 14px; height: 14px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+            </div>
+        </div>
+        <div class="act-kpi-middle">
+            <div class="act-kpi-val">{{ total_logs }}</div>
+            <span class="act-pill-delta">
+                &nearr; +{{ today_events_count }} today
+            </span>
+        </div>
+        <div class="act-kpi-footer">
+            <span>Branch: {{ selected_property.name|default:"All Managed Properties" }}</span>
+            <svg style="width: 48px; height: 16px;" viewBox="0 0 48 16" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round">
+                <path d="M2 12 C 14 14, 24 4, 46 2"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- 2. Financial Flow Captured -->
+    <div class="act-kpi-card">
+        <div class="act-kpi-top">
+            <span class="act-kpi-label">Financial Flow Captured</span>
+            <div class="act-kpi-icon" style="background: #ecfdf5; color: #059669;">
+                <svg width="14" height="14" style="width: 14px; height: 14px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+            </div>
+        </div>
+        <div class="act-kpi-middle">
+            <div class="act-kpi-val">Rs {{ total_financial_flow|floatformat:0 }}</div>
+        </div>
+        <div class="act-kpi-footer">
+            <span>{{ total_payments_count }} payments processed</span>
+            <span style="display: inline-flex; align-items: center; gap: 4px; color: #059669; font-weight: 700; font-size: 11px;">
+                <svg width="12" height="12" style="width: 12px; height: 12px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                {{ verified_pct }}% verified
+            </span>
+        </div>
+    </div>
+
+    <!-- 3. Operational Incidents -->
+    <div class="act-kpi-card">
+        <div class="act-kpi-top">
+            <span class="act-kpi-label">Operational Incidents</span>
+            <div class="act-kpi-icon" style="background: #eff6ff; color: #2563eb; border-radius: 50%;">
+                <svg width="14" height="14" style="width: 14px; height: 14px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+            </div>
+        </div>
+        <div class="act-kpi-middle">
+            <div class="act-kpi-val">{{ total_tickets_count }} Tickets</div>
+        </div>
+        <div class="act-kpi-footer">
+            <span style="color: #2563eb; font-weight: 600;">{{ in_progress_tickets }} in progress</span>
+            <span>{{ resolved_tickets }} resolved</span>
+        </div>
+    </div>
+
+    <!-- 4. Security & Warden Actions -->
+    <div class="act-kpi-card">
+        <div class="act-kpi-top">
+            <span class="act-kpi-label">Security &amp; Warden Actions</span>
+            <div class="act-kpi-icon" style="background: #eef2ff; color: #4f46e5;">
+                <svg width="14" height="14" style="width: 14px; height: 14px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+        </div>
+        <div class="act-kpi-middle">
+            <div class="act-kpi-val">{{ security_actions_count }} Logs</div>
+        </div>
+        <div class="act-kpi-footer">
+            <span>
+                {% if in_progress_tickets == 0 %}
+                All incidents reconciled
+                {% else %}
+                {{ in_progress_tickets }} incident{{ in_progress_tickets|pluralize }} pending resolution
+                {% endif %}
+            </span>
+            <svg width="14" height="14" style="width: 14px; height: 14px; color: #6366f1;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 12h6"/><path d="M12 9v6"/></svg>
+        </div>
+    </div>
+</div>
+
+<!-- Filter & Search Card with Tabs -->
+<div class="act-filter-card">
+    <div class="act-search-row">
+        <!-- Search Input -->
+        <div class="act-search-wrap">
+            <svg class="act-search-icon" width="14" height="14" style="width: 14px; height: 14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input type="text" id="auditSearchInput" class="act-search-input" placeholder="Search by tenant, invoice #, room number, or action keyword..." oninput="filterAuditLogs()" />
+        </div>
+
+        <!-- Dynamic Actor Dropdown -->
+        <select id="actorFilterSelect" class="act-ctrl-select" onchange="filterAuditLogs()">
+            <option value="">All Actors</option>
+            {% for act_name in distinct_actors %}
+            <option value="{{ act_name|lower }}">{{ act_name }}</option>
+            {% endfor %}
+        </select>
+
+        <!-- Dynamic Status Dropdown -->
+        <select id="statusFilterSelect" class="act-ctrl-select" onchange="filterAuditLogs()">
+            <option value="">Status: Any</option>
+            {% for st in distinct_statuses %}
+            <option value="{{ st|lower }}">{{ st }}</option>
+            {% endfor %}
+        </select>
+
+        <!-- Refresh Button -->
+        <button type="button" class="act-ctrl-btn" title="Refresh Audit Trail" onclick="location.reload()">
+            <svg width="13" height="13" style="width: 13px; height: 13px; color: #64748b;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
+        </button>
+    </div>
+
+    <!-- Tab Filters (Strictly Real Counts) -->
+    <div class="act-tabs-row">
+        <button type="button" class="act-tab-pill active" data-tab="all" onclick="setAuditTab(this, 'all')">
+            All Logs ({{ total_logs }})
+        </button>
+        {% if payment_logs_count > 0 %}
+        <button type="button" class="act-tab-pill" data-tab="payment" onclick="setAuditTab(this, 'payment')">
+            Payment Received ({{ payment_logs_count }})
+        </button>
+        {% endif %}
+        {% if invoice_logs_count > 0 %}
+        <button type="button" class="act-tab-pill" data-tab="invoice" onclick="setAuditTab(this, 'invoice')">
+            Invoices Issued ({{ invoice_logs_count }})
+        </button>
+        {% endif %}
+        {% if expense_logs_count > 0 %}
+        <button type="button" class="act-tab-pill" data-tab="expense" onclick="setAuditTab(this, 'expense')">
+            Expenses Logged ({{ expense_logs_count }})
+        </button>
+        {% endif %}
+        {% if ticket_logs_count > 0 %}
+        <button type="button" class="act-tab-pill" data-tab="ticket" onclick="setAuditTab(this, 'ticket')">
+            Maintenance Tickets ({{ ticket_logs_count }})
+        </button>
+        {% endif %}
+        {% if tenant_logs_count > 0 %}
+        <button type="button" class="act-tab-pill" data-tab="tenant" onclick="setAuditTab(this, 'tenant')">
+            Tenant &amp; Bed Check-ins ({{ tenant_logs_count }})
+        </button>
+        {% endif %}
+        {% if warden_logs_count > 0 %}
+        <button type="button" class="act-tab-pill" data-tab="warden" onclick="setAuditTab(this, 'warden')">
+            Warden &amp; Staff ({{ warden_logs_count }})
+        </button>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Main Audit Trail Table -->
+<div class="card" style="padding: 0; overflow: hidden; margin-bottom: 24px;">
+    <div class="table-container" style="margin: 0;">
+        <table class="audit-table">
+            <thead>
+                <tr>
+                    <th style="width: 16%;">ACTION TYPE</th>
+                    <th style="width: 18%;">ACTOR &amp; SOURCE</th>
+                    <th style="width: 32%;">EVENT DETAILS &amp; PAYLOAD</th>
+                    <th style="width: 14%;">TARGET ROOM / UNIT</th>
+                    <th style="width: 10%;">TIMESTAMP (NPT)</th>
+                    <th style="width: 10%;">VERIFICATION</th>
+                </tr>
+            </thead>
+            <tbody id="auditTableBody">
+                {% if activities %}
+                    {% for act in activities %}
+                    <tr class="audit-row"
+                        data-category="{{ act.category }}"
+                        data-actor="{{ act.actor|lower }}"
+                        data-verify="{{ act.verification_label|lower }}"
+                        data-search="{{ act.action|lower }} {{ act.actor|lower }} {{ act.source|lower }} {{ act.plain_payload|lower }} {{ act.target_unit|lower }} {{ act.timestamp|lower }}">
+                        
+                        <!-- 1. ACTION TYPE -->
+                        <td>
+                            {% if act.category == 'payment' %}
+                            <span class="pill-act pill-act-payment">
+                                <span class="dot-payment"></span>
+                                {{ act.action }}
+                            </span>
+                            {% elif act.category == 'invoice' %}
+                            <span class="pill-act pill-act-invoice">
+                                <span class="dot-invoice"></span>
+                                {{ act.action }}
+                            </span>
+                            {% elif act.category == 'ticket' %}
+                            <span class="pill-act pill-act-ticket">
+                                <span class="dot-ticket"></span>
+                                {{ act.action }}
+                            </span>
+                            {% elif act.category == 'expense' %}
+                            <span class="pill-act pill-act-expense">
+                                <span class="dot-expense"></span>
+                                {{ act.action }}
+                            </span>
+                            {% elif act.category == 'tenant' %}
+                            <span class="pill-act pill-act-tenant">
+                                <span class="dot-tenant"></span>
+                                {{ act.action }}
+                            </span>
+                            {% else %}
+                            <span class="pill-act pill-act-warden">
+                                <span class="dot-warden"></span>
+                                {{ act.action }}
+                            </span>
+                            {% endif %}
+                        </td>
+
+                        <!-- 2. ACTOR & SOURCE -->
+                        <td>
+                            <div style="font-size: 12.5px; font-weight: 700; color: #0f172a;">{{ act.actor }}</div>
+                            <div style="font-size: 11px; color: #64748b; margin-top: 2px;">{{ act.source }}</div>
+                        </td>
+
+                        <!-- 3. EVENT DETAILS & PAYLOAD -->
+                        <td>
+                            <div style="font-size: 12.5px; color: #334155; line-height: 1.4;">
+                                {{ act.payload_html|safe }}
+                            </div>
+                        </td>
+
+                        <!-- 4. TARGET ROOM / UNIT -->
+                        <td>
+                            <div style="font-size: 12px; font-weight: 600; color: #1e293b;">
+                                {{ act.target_unit }}
+                            </div>
+                        </td>
+
+                        <!-- 5. TIMESTAMP (NPT) -->
+                        <td>
+                            <div style="font-size: 11.5px; color: #64748b; font-family: -apple-system, BlinkMacSystemFont, monospace;">
+                                {{ act.timestamp }}
+                            </div>
+                        </td>
+
+                        <!-- 6. VERIFICATION -->
+                        <td>
+                            {% if act.verification_type == 'verified' %}
+                            <span style="display: inline-flex; align-items: center; gap: 4px; color: #059669; font-weight: 600; font-size: 11.5px;">
+                                <svg width="13" height="13" style="width: 13px; height: 13px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                                {{ act.verification_label }}
+                            </span>
+                            {% elif act.verification_type == 'voided' %}
+                            <span style="display: inline-flex; align-items: center; gap: 4px; color: #dc2626; font-weight: 600; font-size: 11.5px;">
+                                <svg width="13" height="13" style="width: 13px; height: 13px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                                {{ act.verification_label }}
+                            </span>
+                            {% elif act.verification_type == 'assigned' %}
+                            <span style="display: inline-flex; align-items: center; gap: 4px; color: #6d28d9; font-weight: 600; font-size: 11.5px;">
+                                <svg width="13" height="13" style="width: 13px; height: 13px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                                {{ act.verification_label }}
+                            </span>
+                            {% else %}
+                            <span style="display: inline-flex; align-items: center; gap: 4px; color: #4338ca; font-weight: 600; font-size: 11.5px;">
+                                <svg width="13" height="13" style="width: 13px; height: 13px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                {{ act.verification_label }}
+                            </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 40px; color: #64748b;">
+                            No audit events recorded for the selected property and period. Operational activities will appear here in real time.
+                        </td>
+                    </tr>
+                {% endif %}
+                <tr id="noResultsRow" style="display: none;">
+                    <td colspan="6" style="text-align: center; padding: 36px; color: #64748b; font-size: 13px;">
+                        No audit events match your search criteria. Try adjusting your search query or tab filters.
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    let currentTab = 'all';
+
+    function setAuditTab(btn, tab) {
+        document.querySelectorAll('.act-tab-pill').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentTab = tab;
+        filterAuditLogs();
+    }
+
+    function filterAuditLogs() {
+        const searchInput = document.getElementById('auditSearchInput');
+        const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
+        const actorSelect = document.getElementById('actorFilterSelect');
+        const selectedActor = actorSelect ? actorSelect.value.toLowerCase().trim() : '';
+
+        const statusSelect = document.getElementById('statusFilterSelect');
+        const selectedStatus = statusSelect ? statusSelect.value.toLowerCase().trim() : '';
+
+        const rows = document.querySelectorAll('.audit-row');
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const cat = row.dataset.category || '';
+            const searchData = row.dataset.search || '';
+            const actorData = row.dataset.actor || '';
+            const verifyData = row.dataset.verify || '';
+
+            const matchesTab = (currentTab === 'all') || (cat === currentTab);
+            const matchesQuery = !query || searchData.includes(query);
+            const matchesActor = !selectedActor || actorData.includes(selectedActor);
+            const matchesStatus = !selectedStatus || verifyData.includes(selectedStatus);
+
+            if (matchesTab && matchesQuery && matchesActor && matchesStatus) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        const noResults = document.getElementById('noResultsRow');
+        if (noResults) {
+            noResults.style.display = (visibleCount === 0 && rows.length > 0) ? '' : 'none';
+        }
+    }
+</script>
+{% endblock %}

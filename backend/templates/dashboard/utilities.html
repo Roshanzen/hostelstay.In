@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Utilities - HostelStay.in Owner{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-header-left">
+        <div class="page-title-row">
+            <h1 class="page-title">Utilities &amp; Consumption</h1>
+            <span class="system-status-badge">{{ utilities.count }} Records</span>
+        </div>
+        <p class="page-subtitle">Electricity, water, high-speed internet, and shared facilities billing</p>
+    </div>
+</div>
+
+{% if utilities %}
+<div class="card">
+    <div class="card-header">
+        <div class="card-header-left">
+            <h3>Utility Records</h3>
+            <span class="card-header-badge">{{ utilities.count }} Billed</span>
+        </div>
+    </div>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>BRANCH</th>
+                    <th>UTILITY TYPE</th>
+                    <th>CONSUMED UNITS</th>
+                    <th>UNIT RATE</th>
+                    <th>TOTAL BILLED</th>
+                    <th>BILLING DATE</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in utilities %}
+                <tr>
+                    <td><strong>{{ u.pg.name }}</strong></td>
+                    <td><span class="badge badge-info">{{ u.get_utility_type_display }}</span></td>
+                    <td>{{ u.units }}</td>
+                    <td>Rs {{ u.rate|floatformat:2 }}</td>
+                    <td><strong style="color: var(--slate-900);">Rs {{ u.total_amount|floatformat:0 }}</strong></td>
+                    <td style="color: var(--slate-500); font-size: 12.5px;">{{ u.billing_date|date:"M d, Y" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="card">
+    <div class="empty-state">
+        <h3>No utilities billed yet</h3>
+        <p>Utility consumption logs will be recorded here.</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

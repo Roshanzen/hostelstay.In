@@ -1,0 +1,545 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Reports &amp; Financial Overview - HostelStay.in Owner{% endblock %}
+
+{% block content %}
+<style>
+    .reports-header-row {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 22px;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+    .reports-title-group {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    .reports-title-line {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .fiscal-pill {
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        color: #2563eb;
+        font-size: 10.5px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 3px 9px;
+        border-radius: 9999px;
+    }
+    .reports-actions-col {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 8px;
+    }
+    .reports-top-controls {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .period-segmented-pill {
+        display: inline-flex;
+        align-items: center;
+        background: #f1f5f9;
+        border-radius: 8px;
+        padding: 3px;
+        gap: 2px;
+    }
+    .period-btn {
+        background: transparent;
+        border: none;
+        font-size: 11.5px;
+        font-weight: 600;
+        color: #64748b;
+        padding: 4px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .period-btn.active {
+        background: #ffffff;
+        color: #0f172a;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+    }
+    .date-range-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 5px 11px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #1e293b;
+        cursor: pointer;
+    }
+    .btn-export-black {
+        background: #000000;
+        color: #ffffff;
+        border: none;
+        border-radius: 7px;
+        padding: 6px 14px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+        transition: all 0.15s ease;
+    }
+    .btn-export-black:hover {
+        background: #1e293b;
+    }
+
+    /* Top 4 KPI Cards */
+    .reports-kpi-grid {
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 16px !important;
+        margin-bottom: 22px !important;
+    }
+    .rep-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 16px 18px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+    }
+    .rep-card-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 6px;
+    }
+    .rep-card-label {
+        font-size: 10.5px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #64748b;
+    }
+    .rep-card-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 7px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .rep-val {
+        font-size: 24px;
+        font-weight: 700;
+        color: #0f172a;
+        letter-spacing: -0.02em;
+        line-height: 1.1;
+    }
+    .pill-rep-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 10.5px;
+        font-weight: 600;
+        padding: 2px 7.5px;
+        border-radius: 9999px;
+        margin: 6px 0 10px;
+        width: fit-content;
+    }
+    .pill-rep-blue {
+        background: #eff6ff;
+        color: #2563eb;
+    }
+    .pill-rep-cyan {
+        background: #e0f2fe;
+        color: #0284c7;
+    }
+    .pill-rep-green {
+        background: #ecfdf5;
+        border: 1px solid #a7f3d0;
+        color: #059669;
+    }
+    .rep-card-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 11px;
+        color: #64748b;
+        margin-top: auto;
+    }
+    .mini-sparkline {
+        width: 48px;
+        height: 18px;
+    }
+
+    /* Expense Breakdown Section */
+    .expense-row-item {
+        margin-bottom: 14px;
+    }
+    .expense-row-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 5px;
+        font-size: 12.5px;
+    }
+    .expense-row-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        color: #1e293b;
+    }
+    .expense-row-values {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .expense-bar-track {
+        width: 100%;
+        height: 5px;
+        background: #f1f5f9;
+        border-radius: 9999px;
+        overflow: hidden;
+    }
+    .expense-bar-fill {
+        height: 100%;
+        border-radius: 9999px;
+        transition: width 0.3s ease;
+    }
+    .variance-alert-box {
+        background: #eff6ff;
+        border: 1px solid #dbeafe;
+        border-radius: 8px;
+        padding: 10px 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 18px;
+        font-size: 11.5px;
+        color: #1e40af;
+    }
+
+    /* Bed Occupancy Matrix */
+    .room-matrix-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 12px;
+        margin-top: 14px;
+    }
+    .room-matrix-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 10px 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .room-matrix-id {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+    }
+    .room-num-badge {
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        color: #2563eb;
+        font-size: 10.5px;
+        font-weight: 700;
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+    .room-matrix-name {
+        font-size: 12.5px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+    .pill-matrix-full {
+        background: #ecfdf5;
+        border: 1px solid #a7f3d0;
+        color: #059669;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: 9999px;
+    }
+    .pill-matrix-vacant {
+        background: #f1f5f9;
+        color: #64748b;
+        font-size: 10px;
+        font-weight: 600;
+        padding: 2px 7px;
+        border-radius: 9999px;
+    }
+
+    @media (max-width: 1100px) {
+        .reports-kpi-grid { grid-template-columns: repeat(2, 1fr) !important; }
+    }
+    @media (max-width: 650px) {
+        .reports-kpi-grid { grid-template-columns: 1fr !important; }
+        .reports-actions-col { align-items: flex-start; }
+    }
+</style>
+
+<!-- Page Header -->
+<div class="reports-header-row">
+    <div class="reports-title-group">
+        <div class="reports-title-line">
+            <h1 style="font-size: 22px; font-weight: 700; color: #0f172a; letter-spacing: -0.02em;">Reports &amp; Financial Overview</h1>
+            <span class="fiscal-pill">FISCAL FY-26</span>
+        </div>
+        <p style="font-size: 13px; color: #64748b; margin-top: 2px;">
+            Summary of income, operational costs, net profit, and bed occupancy telemetry across hostel properties.
+        </p>
+    </div>
+
+    <div class="reports-actions-col">
+        <div class="reports-top-controls">
+            <div class="period-segmented-pill">
+                <button type="button" class="period-btn active">Monthly</button>
+                <button type="button" class="period-btn">Quarterly</button>
+                <button type="button" class="period-btn">Yearly</button>
+            </div>
+            <div class="date-range-card">
+                <svg width="13" height="13" style="width: 13px; height: 13px; flex-shrink: 0; color: #6366f1;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/>
+                </svg>
+                <span>{% now "M 1" %} - {% now "M t, Y" %}</span>
+                <svg width="11" height="11" style="width: 11px; height: 11px; flex-shrink: 0; color: #94a3b8;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+            </div>
+        </div>
+        <button type="button" class="btn-export-black" onclick="window.print()">
+            <svg width="13" height="13" style="width: 13px; height: 13px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+            <span>Export Report</span>
+            <svg width="10" height="10" style="width: 10px; height: 10px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+    </div>
+</div>
+
+<!-- 4 KPI Summary Cards (Exact Match to Screenshot) -->
+<div class="reports-kpi-grid">
+    <!-- 1. TOTAL COLLECTIONS -->
+    <div class="rep-card">
+        <div class="rep-card-top">
+            <span class="rep-card-label">TOTAL COLLECTIONS</span>
+            <div class="rep-card-icon" style="background: #eff6ff; color: #2563eb;">
+                <svg width="15" height="15" style="width: 15px; height: 15px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+            </div>
+        </div>
+        <div class="rep-val">Rs {{ total_collected|floatformat:0 }}</div>
+        <div class="pill-rep-badge pill-rep-cyan">&nearr; +14.2% vs last month</div>
+        <div class="rep-card-footer">
+            <span>Rent &amp; Amenities collected</span>
+            <svg class="mini-sparkline" viewBox="0 0 48 18" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round">
+                <path d="M2 14 C 14 16, 24 6, 46 4"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- 2. TOTAL EXPENSES -->
+    <div class="rep-card">
+        <div class="rep-card-top">
+            <span class="rep-card-label">TOTAL EXPENSES</span>
+            <div class="rep-card-icon" style="background: #eff6ff; color: #2563eb;">
+                <svg width="15" height="15" style="width: 15px; height: 15px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+        </div>
+        <div class="rep-val">Rs {{ total_expenses|floatformat:0 }}</div>
+        <div class="pill-rep-badge pill-rep-blue">&searr; -5.1% under budget</div>
+        <div class="rep-card-footer">
+            <span>Operations &amp; Maintenance</span>
+            <svg class="mini-sparkline" viewBox="0 0 48 18" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round">
+                <path d="M2 6 C 14 4, 24 14, 46 12"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- 3. NET PROFIT -->
+    <div class="rep-card">
+        <div class="rep-card-top">
+            <span class="rep-card-label">NET PROFIT</span>
+            <div class="rep-card-icon" style="background: #ecfdf5; color: #059669;">
+                <svg width="15" height="15" style="width: 15px; height: 15px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>
+            </div>
+        </div>
+        <div class="rep-val">Rs {{ net_profit|floatformat:0 }}</div>
+        <div class="pill-rep-badge pill-rep-green">&bull; {{ net_margin }}% Net Margin</div>
+        <div class="rep-card-footer">
+            <span>Income minus operating costs</span>
+            <span style="color: #059669; font-weight: 700; font-size: 11.5px;">Healthy</span>
+        </div>
+    </div>
+
+    <!-- 4. OCCUPANCY RATE -->
+    <div class="rep-card">
+        <div class="rep-card-top">
+            <span class="rep-card-label">OCCUPANCY RATE</span>
+            <div class="rep-card-icon" style="background: #eef2ff; color: #4f46e5;">
+                <svg width="15" height="15" style="width: 15px; height: 15px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/></svg>
+            </div>
+        </div>
+        <div style="display: flex; align-items: baseline; justify-content: space-between;">
+            <div class="rep-val">{{ occupancy_rate }}%</div>
+            <div style="font-size: 12px; font-weight: 600; color: #64748b;">{{ occupied_beds }} / {{ total_beds }} Beds</div>
+        </div>
+        <div class="kpi-progress-bar" style="height: 6px; margin: 10px 0;">
+            <div class="kpi-progress-fill" style="width: {{ occupancy_rate }}%; background: #4f46e5;"></div>
+        </div>
+        <div class="rep-card-footer">
+            <span>{{ vacant_beds }} Beds currently vacant</span>
+            <span style="font-weight: 600; color: #334155;">{{ global_active_property.name|default:"Thamel HQ" }}</span>
+        </div>
+    </div>
+</div>
+
+<!-- Middle Card: Expense Breakdown (Exact Match to Screenshot) -->
+<div class="card" style="margin-bottom: 22px;">
+    <div class="card-header">
+        <div class="card-header-left" style="flex-direction: column; align-items: flex-start; gap: 2px;">
+            <h3>Expense Breakdown</h3>
+            <span style="font-size: 11.5px; color: #64748b;">Categorized operational outlays for {% now "F" %}</span>
+        </div>
+        <span style="font-size: 12px; font-weight: 700; color: #0f172a; text-transform: uppercase;">
+            RS {{ total_expenses|floatformat:0 }} TOTAL
+        </span>
+    </div>
+    <div class="card-body">
+        {% for exp in expense_breakdown %}
+        <div class="expense-row-item">
+            <div class="expense-row-top">
+                <div class="expense-row-title">
+                    {% if exp.icon == 'utensils' %}
+                    <svg width="14" height="14" style="width: 14px; height: 14px; flex-shrink: 0; color: #475569;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" x2="6" y1="1" y2="4"/></svg>
+                    {% elif exp.icon == 'zap' %}
+                    <svg width="14" height="14" style="width: 14px; height: 14px; flex-shrink: 0; color: #6366f1;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    {% elif exp.icon == 'wrench' %}
+                    <svg width="14" height="14" style="width: 14px; height: 14px; flex-shrink: 0; color: #64748b;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                    {% else %}
+                    <svg width="14" height="14" style="width: 14px; height: 14px; flex-shrink: 0; color: #94a3b8;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                    {% endif %}
+                    <span>{{ exp.name }}</span>
+                </div>
+                <div class="expense-row-values">
+                    <strong style="color: #0f172a;">Rs {{ exp.amount|floatformat:0 }}</strong>
+                    <span style="font-size: 11px; font-weight: 600; color: #64748b; width: 44px; text-align: right;">{{ exp.pct }}%</span>
+                </div>
+            </div>
+            <div class="expense-bar-track">
+                <div class="expense-bar-fill" style="width: {{ exp.pct }}%; background: {{ exp.bar_color }};"></div>
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- Budget Variance Alert Box -->
+        <div class="variance-alert-box">
+            <svg width="16" height="16" style="width: 16px; height: 16px; flex-shrink: 0; color: #2563eb;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="16" y2="12"/><line x1="12" x2="12.01" y1="8" y2="8"/>
+            </svg>
+            <div>
+                <strong>Budget Variance Alert</strong>
+                <span style="margin-left: 4px;">Mess grocery cost lowered by 3.2% through bulk supply procurement.</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bottom Card: Bed Occupancy & Room Distribution (Exact Match) -->
+<div class="card" style="margin-bottom: 22px;">
+    <div class="card-header">
+        <div class="card-header-left" style="flex-direction: column; align-items: flex-start; gap: 2px;">
+            <h3>Bed Occupancy &amp; Room Distribution</h3>
+            <span style="font-size: 11.5px; color: #64748b;">Live visual allocation matrix across residential wings</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 14px; font-size: 11px; font-weight: 600;">
+            <span style="display: flex; align-items: center; gap: 5px; color: #059669;">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background: #059669;"></span>
+                Occupied ({{ occupied_beds }})
+            </span>
+            <span style="display: flex; align-items: center; gap: 5px; color: #64748b;">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background: #94a3b8;"></span>
+                Vacant Available ({{ vacant_beds }})
+            </span>
+        </div>
+    </div>
+    <div class="card-body">
+        {% if room_matrix %}
+        <div class="room-matrix-grid">
+            {% for r in room_matrix %}
+            <div class="room-matrix-card">
+                <div class="room-matrix-id">
+                    <span class="room-num-badge">{{ r.room_number }}</span>
+                    <span class="room-matrix-name">Room {{ r.room_number }}</span>
+                </div>
+                {% if r.is_full %}
+                <span class="pill-matrix-full">100% Full</span>
+                {% elif r.occupied > 0 %}
+                <span class="pill-matrix-full" style="background: #eff6ff; border-color: #bfdbfe; color: #2563eb;">{{ r.pct }}% Full</span>
+                {% else %}
+                <span class="pill-matrix-vacant">0% Full</span>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div style="padding: 16px; background: #f8fafc; border-radius: 8px; text-align: center; color: #64748b; font-size: 12px;">
+            No room matrix configured yet. <a href="{% url 'web-rooms' %}" style="color: #4f46e5; font-weight: 600;">Configure rooms &rarr;</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Property Performance Breakdown Table -->
+<div class="card">
+    <div class="card-header">
+        <div class="card-header-left">
+            <h3>Branch Performance Ledger</h3>
+            <span class="card-header-badge">{{ property_breakdown|length }} Properties</span>
+        </div>
+    </div>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>BRANCH</th>
+                    <th>ROOMS</th>
+                    <th>TOTAL BEDS</th>
+                    <th>OCCUPIED</th>
+                    <th>VACANT</th>
+                    <th>OCCUPANCY RATE</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in property_breakdown %}
+                <tr>
+                    <td><strong>{{ p.name }}</strong></td>
+                    <td>{{ p.rooms }} Rooms</td>
+                    <td>{{ p.total_beds }} Beds</td>
+                    <td><strong style="color: #059669;">{{ p.occupied }}</strong></td>
+                    <td>{{ p.vacant }}</td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <div class="kpi-progress-bar" style="width: 90px; margin: 0; height: 5px;">
+                                <div class="kpi-progress-fill" style="width: {{ p.occupancy_rate }}%; background: #4f46e5;"></div>
+                            </div>
+                            <span style="font-weight: 700; font-size: 11.5px;">{{ p.occupancy_rate }}%</span>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

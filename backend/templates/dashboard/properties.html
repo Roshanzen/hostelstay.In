@@ -1,0 +1,1330 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Properties &amp; Multi-Branch Management - HostelStay.in{% endblock %}
+
+{% block content %}
+<style>
+    /* ==========================================================================
+       PROPERTIES & MULTI-BRANCH MANAGEMENT SCREEN (MATCHING REFERENCE UI/UX)
+       ========================================================================== */
+    .prop-mgmt-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 24px;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+    .prop-mgmt-title {
+        font-size: 26px;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0 0 6px 0;
+        letter-spacing: -0.02em;
+    }
+    .prop-status-pill-header {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #4f46e5;
+        margin-bottom: 4px;
+    }
+    .prop-status-pill-header .dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #4f46e5;
+    }
+    .prop-mgmt-subtitle {
+        font-size: 13px;
+        color: #64748b;
+        margin: 0;
+        max-width: 650px;
+        line-height: 1.45;
+    }
+    .prop-mgmt-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .btn-branch-selector {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        color: #334155;
+        font-size: 13px;
+        font-weight: 600;
+        padding: 8px 14px;
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.15s ease;
+    }
+    .btn-branch-selector:hover {
+        border-color: #cbd5e1;
+        background: #f8fafc;
+    }
+    .btn-export-dir {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        color: #334155;
+        font-size: 13px;
+        font-weight: 600;
+        padding: 8px 14px;
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.15s ease;
+    }
+    .btn-export-dir:hover {
+        border-color: #cbd5e1;
+        background: #f8fafc;
+    }
+    .btn-add-property {
+        background: #0f172a;
+        color: #ffffff;
+        border: 1px solid #0f172a;
+        font-size: 13px;
+        font-weight: 600;
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.15s ease;
+    }
+    .btn-add-property:hover {
+        background: #1e293b;
+        border-color: #1e293b;
+    }
+
+    /* 4 Telemetry KPI Cards */
+    .prop-kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    .prop-kpi-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 18px 20px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+    .prop-kpi-card::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+    }
+    .prop-kpi-card.kpi-managed::after { background: #6366f1; }
+    .prop-kpi-card.kpi-capacity::after { background: #3b82f6; }
+    .prop-kpi-card.kpi-residents::after { background: #10b981; }
+    .prop-kpi-card.kpi-invoiced::after { background: #06b6d4; }
+
+    .prop-kpi-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+    }
+    .prop-kpi-label {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        color: #64748b;
+        text-transform: uppercase;
+    }
+    .prop-kpi-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+    }
+    .kpi-managed .prop-kpi-icon { background: #eff6ff; color: #4f46e5; }
+    .kpi-capacity .prop-kpi-icon { background: #eff6ff; color: #2563eb; }
+    .kpi-residents .prop-kpi-icon { background: #ecfdf5; color: #059669; }
+    .kpi-invoiced .prop-kpi-icon { background: #ecfeff; color: #0891b2; }
+
+    .prop-kpi-value {
+        font-size: 24px;
+        font-weight: 800;
+        color: #0f172a;
+        line-height: 1.1;
+        margin-bottom: 12px;
+        letter-spacing: -0.02em;
+    }
+    .prop-kpi-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 12px;
+        font-weight: 500;
+        color: #64748b;
+        padding-top: 4px;
+    }
+    .kpi-pill-badge {
+        background: #f1f5f9;
+        color: #475569;
+        padding: 2px 8px;
+        border-radius: 9999px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    /* Filter & Search Bar */
+    .prop-filter-bar {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 8px 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 24px;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+    .prop-search-box {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex: 1;
+        min-width: 280px;
+    }
+    .prop-search-box svg {
+        color: #94a3b8;
+        flex-shrink: 0;
+    }
+    .prop-search-box input {
+        border: none;
+        outline: none;
+        width: 100%;
+        font-size: 13px;
+        color: #1e293b;
+        background: transparent;
+    }
+    .prop-pills-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .prop-filter-pill {
+        padding: 5px 12px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #64748b;
+        background: transparent;
+        border: 1px solid transparent;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.15s ease;
+    }
+    .prop-filter-pill:hover {
+        background: #f8fafc;
+        color: #1e293b;
+    }
+    .prop-filter-pill.active {
+        background: #f1f5f9;
+        color: #0f172a;
+        border-color: #e2e8f0;
+    }
+    .prop-view-toggles {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding-left: 8px;
+        border-left: 1px solid #e2e8f0;
+    }
+    .prop-view-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        border: 1px solid transparent;
+        background: transparent;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: #64748b;
+        transition: all 0.15s ease;
+    }
+    .prop-view-btn:hover {
+        background: #f1f5f9;
+        color: #0f172a;
+    }
+    .prop-view-btn.active {
+        background: #f1f5f9;
+        border-color: #e2e8f0;
+        color: #0f172a;
+    }
+
+    /* Main Two-Column Layout */
+    .prop-main-layout {
+        display: grid;
+        grid-template-columns: 1fr 340px;
+        gap: 24px;
+        align-items: start;
+    }
+
+    /* Left: Property Cards */
+    .prop-cards-column {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+    .prop-item-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        transition: border-color 0.15s ease;
+    }
+    .prop-item-card:hover {
+        border-color: #cbd5e1;
+    }
+
+    .prop-card-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+    .prop-header-left {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+    }
+    .prop-avatar-box {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        background: #0f172a;
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .prop-title-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 4px;
+    }
+    .prop-branch-name {
+        font-size: 18px;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0;
+        text-decoration: none;
+    }
+    .prop-branch-name:hover {
+        color: #2563eb;
+    }
+    .badge-accepting-residents {
+        background: #052e16;
+        color: #4ade80;
+        font-size: 10.5px;
+        font-weight: 700;
+        padding: 3px 9px;
+        border-radius: 9999px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .badge-accepting-residents .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #22c55e;
+    }
+    .badge-prop-code {
+        background: #f1f5f9;
+        color: #475569;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 2px 7px;
+        border-radius: 6px;
+    }
+    .prop-address-line {
+        font-size: 13px;
+        color: #475569;
+        margin: 3px 0;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .prop-meta-line {
+        font-size: 12px;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .prop-header-right {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 6px;
+    }
+    .prop-phone-link {
+        font-size: 12.5px;
+        font-weight: 600;
+        color: #334155;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .prop-email-pill {
+        background: #f1f5f9;
+        color: #334155;
+        font-size: 12px;
+        font-weight: 500;
+        padding: 3px 10px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        text-decoration: none;
+    }
+
+    /* Warden & Facility Banner */
+    .prop-warden-banner {
+        background: #f8fafc;
+        border: 1px solid #f1f5f9;
+        border-radius: 12px;
+        padding: 12px 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+    .prop-warden-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .prop-warden-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: #3b82f6;
+        color: #ffffff;
+        font-weight: 700;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .prop-sub-label {
+        font-size: 10px;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 2px;
+    }
+    .prop-sub-value {
+        font-size: 13px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    /* Occupancy Progress Breakdown */
+    .prop-occupancy-section {
+        margin-bottom: 20px;
+    }
+    .prop-occ-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 13px;
+        margin-bottom: 8px;
+    }
+    .prop-occ-title {
+        font-weight: 700;
+        color: #1e293b;
+    }
+    .prop-occ-pct {
+        font-weight: 800;
+        color: #6366f1;
+    }
+    .prop-multi-bar {
+        height: 8px;
+        border-radius: 9999px;
+        background: #e2e8f0;
+        display: flex;
+        overflow: hidden;
+        margin-bottom: 10px;
+    }
+    .bar-seg-occupied {
+        background: #6366f1;
+        height: 100%;
+    }
+    .bar-seg-reserved {
+        background: #06b6d4;
+        height: 100%;
+    }
+    .bar-seg-vacant {
+        background: #cbd5e1;
+        height: 100%;
+    }
+    .prop-occ-legend {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        font-size: 12px;
+        color: #64748b;
+        font-weight: 500;
+        flex-wrap: wrap;
+    }
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .legend-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+    }
+    .dot-occupied { background: #6366f1; }
+    .dot-reserved { background: #06b6d4; }
+    .dot-vacant { background: #94a3b8; }
+    .legend-rooms-count {
+        margin-left: auto;
+        color: #334155;
+        font-weight: 600;
+    }
+
+    /* Sharing Types Grid */
+    .prop-sharing-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+    }
+    .prop-sharing-card {
+        background: #f8fafc;
+        border: 1px solid #f1f5f9;
+        border-radius: 12px;
+        padding: 12px 14px;
+    }
+    .sharing-top-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 4px;
+    }
+    .sharing-title {
+        font-size: 10.5px;
+        font-weight: 800;
+        color: #64748b;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+    }
+    .badge-full {
+        background: #052e16;
+        color: #4ade80;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: 9999px;
+    }
+    .badge-vacant {
+        background: #eff6ff;
+        color: #2563eb;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: 9999px;
+    }
+    .sharing-rooms-num {
+        font-size: 15px;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 2px 0 2px 0;
+    }
+    .sharing-desc {
+        font-size: 11.5px;
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    /* Right: Expansion Hub Card */
+    .prop-expansion-card {
+        background: #fdfcff;
+        border: 1px solid #ede9fe;
+        border-radius: 16px;
+        padding: 24px;
+        position: sticky;
+        top: 24px;
+        box-shadow: 0 2px 8px rgba(99,102,241,0.03);
+    }
+    .expansion-top-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+    }
+    .expansion-icon-box {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: #4f46e5;
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .expansion-pill-tag {
+        background: #e0e7ff;
+        color: #4338ca;
+        font-size: 10.5px;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        padding: 4px 10px;
+        border-radius: 9999px;
+    }
+    .expansion-heading {
+        font-size: 17px;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0 0 8px 0;
+        letter-spacing: -0.01em;
+    }
+    .expansion-desc {
+        font-size: 12.5px;
+        color: #475569;
+        line-height: 1.5;
+        margin: 0 0 20px 0;
+    }
+    .expansion-checklist {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 24px;
+    }
+    .checklist-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        font-size: 12.5px;
+        color: #334155;
+        line-height: 1.4;
+    }
+    .check-circle {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #e0e7ff;
+        color: #4f46e5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        margin-top: 1px;
+    }
+    .btn-expansion-cta {
+        width: 100%;
+        background: #4f46e5;
+        color: #ffffff;
+        border: 1px solid #4f46e5;
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        transition: all 0.15s ease;
+    }
+    .btn-expansion-cta:hover {
+        background: #4338ca;
+        border-color: #4338ca;
+    }
+
+    /* Modal Styling */
+    .prop-modal-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(15, 23, 42, 0.45);
+        backdrop-filter: blur(4px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        padding: 16px;
+    }
+    .prop-modal-box {
+        background: #ffffff;
+        border-radius: 16px;
+        width: 100%;
+        max-width: 520px;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+    }
+    .prop-modal-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .prop-modal-title {
+        font-size: 18px;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0;
+    }
+    .prop-modal-close {
+        background: transparent;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+        color: #94a3b8;
+    }
+    .prop-modal-body {
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+    .prop-form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    .prop-form-group label {
+        font-size: 12.5px;
+        font-weight: 700;
+        color: #334155;
+    }
+    .prop-form-group input, .prop-form-group textarea {
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 9px 12px;
+        font-size: 13px;
+        color: #0f172a;
+        outline: none;
+    }
+    .prop-form-group input:focus, .prop-form-group textarea:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    .prop-modal-footer {
+        padding: 16px 24px;
+        background: #f8fafc;
+        border-top: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+        .prop-kpi-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        .prop-main-layout {
+            grid-template-columns: 1fr;
+        }
+        .prop-expansion-card {
+            position: static;
+        }
+    }
+    @media (max-width: 640px) {
+        .prop-kpi-grid {
+            grid-template-columns: 1fr;
+        }
+        .prop-sharing-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<!-- Header Row -->
+<div class="prop-mgmt-header">
+    <div>
+        <h1 class="prop-mgmt-title">Properties &amp; Multi-Branch Management</h1>
+        <div class="prop-status-pill-header">
+            <span class="dot"></span>
+            <span>{{ active_branches_count }} Active Branch{% if active_branches_count != 1 %}es{% endif %} &bull; Multi-Property Enabled</span>
+        </div>
+        <p class="prop-mgmt-subtitle">
+            Configure hostel branches, room inventories, bed capacities, wardens in charge, and automated branch billing.
+        </p>
+    </div>
+    <div class="prop-mgmt-actions">
+        <!-- Branch Selector Dropdown -->
+        <select class="btn-branch-selector" onchange="filterBranch(this.value)">
+            <option value="">All Branches ({{ total_branches_count }})</option>
+            {% for p in properties %}
+            <option value="{{ p.id }}" {% if selected_pg_id == p.id|stringformat:"s" %}selected{% endif %}>
+                {{ p.name }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <button class="btn-export-dir" onclick="window.print()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            <span>Export Directory</span>
+        </button>
+
+        <button class="btn-add-property" onclick="openAddPropertyModal()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>Add New Property</span>
+        </button>
+    </div>
+</div>
+
+<!-- 4 Telemetry KPI Cards -->
+<div class="prop-kpi-grid">
+    <!-- Card 1: MANAGED BRANCHES -->
+    <div class="prop-kpi-card kpi-managed">
+        <div class="prop-kpi-top">
+            <span class="prop-kpi-label">MANAGED BRANCHES</span>
+            <div class="prop-kpi-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+                    <line x1="9" y1="22" x2="9" y2="22.01"></line>
+                    <line x1="15" y1="22" x2="15" y2="22.01"></line>
+                    <line x1="9" y1="6" x2="9" y2="6.01"></line>
+                    <line x1="15" y1="6" x2="15" y2="6.01"></line>
+                    <line x1="9" y1="10" x2="9" y2="10.01"></line>
+                    <line x1="15" y1="10" x2="15" y2="10.01"></line>
+                    <line x1="9" y1="14" x2="9" y2="14.01"></line>
+                    <line x1="15" y1="14" x2="15" y2="14.01"></line>
+                    <line x1="9" y1="18" x2="9" y2="18.01"></line>
+                    <line x1="15" y1="18" x2="15" y2="18.01"></line>
+                </svg>
+            </div>
+        </div>
+        <div class="prop-kpi-value">{{ active_branches_count }} Active</div>
+        <div class="prop-kpi-footer">
+            <span>&bull; {{ pending_activation_count }} Pending activation</span>
+            <span style="color: #4f46e5; font-weight: 700;">{{ operational_pct|floatformat:0 }}% Operational</span>
+        </div>
+    </div>
+
+    <!-- Card 2: INVENTORY CAPACITY -->
+    <div class="prop-kpi-card kpi-capacity">
+        <div class="prop-kpi-top">
+            <span class="prop-kpi-label">INVENTORY CAPACITY</span>
+            <div class="prop-kpi-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <path d="M2 4v16"></path>
+                    <path d="M2 8h18a2 2 0 0 1 2 2v10"></path>
+                    <path d="M2 17h20"></path>
+                    <path d="M6 8v9"></path>
+                </svg>
+            </div>
+        </div>
+        <div class="prop-kpi-value">{{ total_rooms_count }} R / {{ total_beds_count }} Beds</div>
+        <div class="prop-kpi-footer">
+            <span style="color: #2563eb; font-weight: 700;">{{ occupancy_pct }}% Occupancy Rate</span>
+            <span>Avg {{ avg_beds_per_room }} Beds/Rm</span>
+        </div>
+    </div>
+
+    <!-- Card 3: CURRENT RESIDENTS -->
+    <div class="prop-kpi-card kpi-residents">
+        <div class="prop-kpi-top">
+            <span class="prop-kpi-label">CURRENT RESIDENTS</span>
+            <div class="prop-kpi-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+            </div>
+        </div>
+        <div class="prop-kpi-value">{{ total_residents_count }} Tenants</div>
+        <div class="prop-kpi-footer">
+            <span style="color: #10b981; font-weight: 700;">&nearr; +{{ admitted_this_week }} Admitted this week</span>
+            <span class="kpi-pill-badge">{{ total_vacancies }} Vacancies</span>
+        </div>
+    </div>
+
+    <!-- Card 4: MONTHLY INVOICED -->
+    <div class="prop-kpi-card kpi-invoiced">
+        <div class="prop-kpi-top">
+            <span class="prop-kpi-label">MONTHLY INVOICED</span>
+            <div class="prop-kpi-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+                    <line x1="2" y1="10" x2="22" y2="10"></line>
+                </svg>
+            </div>
+        </div>
+        <div class="prop-kpi-value">Rs {{ monthly_invoiced_display }}</div>
+        <div class="prop-kpi-footer">
+            <span style="color: #059669; font-weight: 700;">&check; {{ collection_health_pct }}% Collection Health</span>
+            <span>{{ overdue_dues_count }} Overdue Dues</span>
+        </div>
+    </div>
+</div>
+
+<!-- Search & Filter Bar -->
+<div class="prop-filter-bar">
+    <div class="prop-search-box">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="propSearchInput" placeholder="Search property by branch name, address, lead warden, or phone..." onkeyup="filterProperties(this.value)">
+    </div>
+
+    <div class="prop-pills-row">
+        <a href="{% url 'web-properties' %}" class="prop-filter-pill {% if not status_filter and not selected_pg_id %}active{% endif %}">
+            All Branches ({{ total_branches_count }})
+        </a>
+        <a href="?status=active" class="prop-filter-pill {% if status_filter == 'active' %}active{% endif %}">
+            Active ({{ active_branches_count }})
+        </a>
+        {% for loc in unique_locations %}
+        <span class="prop-filter-pill" onclick="filterByLocation('{{ loc }}')">
+            {{ loc }}
+        </span>
+        {% endfor %}
+    </div>
+
+    <div class="prop-view-toggles">
+        <button class="prop-view-btn active" id="btnGridView" onclick="switchView('grid')" title="Grid View">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+        </button>
+        <button class="prop-view-btn" id="btnTableView" onclick="switchView('table')" title="Ledger / Table View">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <line x1="8" y1="6" x2="21" y2="6"></line>
+                <line x1="8" y1="12" x2="21" y2="12"></line>
+                <line x1="8" y1="18" x2="21" y2="18"></line>
+                <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                <line x1="3" y1="18" x2="3.01" y2="18"></line>
+            </svg>
+        </button>
+    </div>
+</div>
+
+<!-- Main Two-Column Layout -->
+<div class="prop-main-layout">
+    <!-- LEFT: Properties List (Grid & Table) -->
+    <div class="prop-cards-column">
+        <!-- GRID VIEW -->
+        <div id="propertiesGridView">
+            {% for pdata in properties_data %}
+            <div class="prop-item-card" data-search="{{ pdata.property.name }} {{ pdata.property.address }} {{ pdata.lead_warden.name }} {{ pdata.property.phone }}">
+                <!-- Card Header -->
+                <div class="prop-card-header">
+                    <div class="prop-header-left">
+                        <div class="prop-avatar-box">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="prop-title-row">
+                                <a href="{% url 'web-property-detail' pdata.property.id %}" class="prop-branch-name">
+                                    {{ pdata.property.name }}
+                                </a>
+                                <span class="badge-accepting-residents">
+                                    <span class="dot"></span>
+                                    ACTIVE &bull; ACCEPTING RESIDENTS
+                                </span>
+                                <span class="badge-prop-code">Code: {{ pdata.code }}</span>
+                            </div>
+                            <div class="prop-address-line">
+                                <span>📍</span>
+                                <span>{{ pdata.property.address|default:"Address configured in branch settings" }}</span>
+                            </div>
+                            <div class="prop-meta-line">
+                                <span>🕒 Est. {{ pdata.property.created_at|date:"M Y" }}</span>
+                                <span>&bull;</span>
+                                <span>{{ pdata.category_label }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="prop-header-right">
+                        {% if pdata.property.phone %}
+                        <a href="tel:{{ pdata.property.phone }}" class="prop-phone-link">
+                            <span>📞</span>
+                            <span>{{ pdata.property.phone }}</span>
+                        </a>
+                        {% endif %}
+                        {% if pdata.property.email %}
+                        <span class="prop-email-pill">
+                            <span>✉</span>
+                            <span>{{ pdata.property.email }}</span>
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Section 1: Warden & Facility Staff Banner -->
+                <div class="prop-warden-banner">
+                    <div class="prop-warden-item">
+                        <div class="prop-warden-avatar">
+                            {{ pdata.lead_warden.initials }}
+                        </div>
+                        <div>
+                            <div class="prop-sub-label">LEAD BRANCH WARDEN</div>
+                            <div class="prop-sub-value">{{ pdata.lead_warden.name }} &nbsp;<span style="color: #64748b; font-weight: 500;">ID: {{ pdata.lead_warden.code }}</span></div>
+                        </div>
+                    </div>
+
+                    <div class="prop-warden-item">
+                        <div>
+                            <div class="prop-sub-label">Mess In-charge</div>
+                            <div class="prop-sub-value">Active (4 Meals/Day)</div>
+                        </div>
+                    </div>
+
+                    <div class="prop-warden-item">
+                        <div>
+                            <div class="prop-sub-label">Security Guard</div>
+                            <div class="prop-sub-value">24/7 Gate Roster</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Occupancy Breakdown -->
+                <div class="prop-occupancy-section">
+                    <div class="prop-occ-header">
+                        <span class="prop-occ-title">
+                            Occupancy Breakdown &bull; {{ pdata.occupied_beds }} of {{ pdata.total_beds }} Beds Filled
+                        </span>
+                        <span class="prop-occ-pct">{{ pdata.occupancy_pct }}% Filled</span>
+                    </div>
+
+                    <div class="prop-multi-bar">
+                        <div class="bar-seg-occupied" style="width: {{ pdata.progress_occupied_pct }}%;"></div>
+                        <div class="bar-seg-reserved" style="width: {{ pdata.progress_reserved_pct }}%;"></div>
+                        <div class="bar-seg-vacant" style="width: {{ pdata.progress_vacant_pct }}%;"></div>
+                    </div>
+
+                    <div class="prop-occ-legend">
+                        <div class="legend-item">
+                            <span class="legend-dot dot-occupied"></span>
+                            <span>{{ pdata.occupied_beds }} Occupied</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-dot dot-reserved"></span>
+                            <span>{{ pdata.reserved_beds }} Reserved (Advance Paid)</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-dot dot-vacant"></span>
+                            <span>{{ pdata.vacant_beds }} Ready to Allocate</span>
+                        </div>
+                        <span class="legend-rooms-count">{{ pdata.total_rooms }} Total Rooms Configured</span>
+                    </div>
+                </div>
+
+                <!-- Section 3: Room Sharing Types Breakdown Cards -->
+                <div class="prop-sharing-grid">
+                    {% for sc in pdata.sharing_cards %}
+                    <div class="prop-sharing-card">
+                        <div class="sharing-top-row">
+                            <span class="sharing-title">{{ sc.type_name }}</span>
+                            {% if sc.badge_is_full %}
+                            <span class="badge-full">{{ sc.badge_text }}</span>
+                            {% else %}
+                            <span class="badge-vacant">{{ sc.badge_text }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="sharing-rooms-num">{{ sc.rooms_count }}</div>
+                        <div class="sharing-desc">{{ sc.detail_text }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Card Actions Row -->
+                <div class="prop-card-actions-bar" style="margin-top: 18px; padding-top: 14px; border-top: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; gap: 8px;">
+                        <a href="{% url 'web-property-detail' pdata.property.id %}" class="btn btn-sm btn-secondary" style="font-weight: 600;">
+                            View Branch &amp; Rooms &rarr;
+                        </a>
+                        <a href="{% url 'web-property-edit' pdata.property.id %}" class="btn btn-sm btn-secondary" style="font-weight: 600;">
+                            &#9998; Edit Branch
+                        </a>
+                    </div>
+                    <div>
+                        <form method="post" action="{% url 'web-property-delete' pdata.property.id %}" style="display: inline;" onsubmit="return confirm('Are you sure you want to deactivate or remove {{ pdata.property.name }}? If active tenants exist, the branch will be safely deactivated to protect audit history.');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-secondary" style="color: #ef4444; border-color: #fee2e2; font-weight: 600;">
+                                &#128465; Deactivate
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="card" style="padding: 40px; text-align: center;">
+                <h3>No Properties Found</h3>
+                <p style="color: #64748b; margin-top: 8px;">Register your first property branch to begin tracking inventory and automated billing.</p>
+                <button class="btn btn-primary" style="margin-top: 16px;" onclick="openAddPropertyModal()">+ Register Branch</button>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- TABLE / LEDGER VIEW (Hidden by default) -->
+        <div id="propertiesTableView" style="display: none;">
+            <div class="card" style="padding: 0; overflow: hidden;">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>BRANCH NAME</th>
+                                <th>CODE</th>
+                                <th>ADDRESS</th>
+                                <th>LEAD WARDEN</th>
+                                <th>ROOMS &amp; BEDS</th>
+                                <th>OCCUPANCY</th>
+                                <th>STATUS</th>
+                                <th>ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pdata in properties_data %}
+                            <tr>
+                                <td>
+                                    <strong>{{ pdata.property.name }}</strong>
+                                </td>
+                                <td><span class="badge-prop-code">{{ pdata.code }}</span></td>
+                                <td>{{ pdata.property.address|truncatechars:30 }}</td>
+                                <td>
+                                    <span style="font-weight: 600;">{{ pdata.lead_warden.name }}</span>
+                                </td>
+                                <td>{{ pdata.total_rooms }} R / {{ pdata.total_beds }} Beds</td>
+                                <td>
+                                    <span style="font-weight: 700; color: #4f46e5;">{{ pdata.occupancy_pct }}%</span>
+                                </td>
+                                <td>
+                                    <span class="badge badge-success">Active</span>
+                                </td>
+                                <td>
+                                    <div style="display: flex; gap: 6px;">
+                                        <a href="{% url 'web-property-detail' pdata.property.id %}" class="btn btn-sm btn-secondary">
+                                            View
+                                        </a>
+                                        <a href="{% url 'web-property-edit' pdata.property.id %}" class="btn btn-sm btn-secondary">
+                                            Edit
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT: Expansion Hub Card -->
+    <div class="prop-expansion-card">
+        <div class="expansion-top-row">
+            <div class="expansion-icon-box">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <rect x="2" y="2" width="8" height="8" rx="2"></rect>
+                    <rect x="14" y="2" width="8" height="8" rx="2"></rect>
+                    <rect x="8" y="14" width="8" height="8" rx="2"></rect>
+                    <line x1="6" y1="10" x2="6" y2="14"></line>
+                    <line x1="18" y1="10" x2="18" y2="14"></line>
+                    <line x1="6" y1="14" x2="8" y2="14"></line>
+                    <line x1="18" y1="14" x2="16" y2="14"></line>
+                </svg>
+            </div>
+            <span class="expansion-pill-tag">EXPANSION HUB</span>
+        </div>
+
+        <h3 class="expansion-heading">Expand Your Hostel Network</h3>
+        <p class="expansion-desc">
+            Operate multiple hostels, PGs, or student dormitories under one unified owner dashboard. Each branch retains dedicated wardens, inventory, and automated billing.
+        </p>
+
+        <div class="expansion-checklist">
+            <div class="checklist-item">
+                <div class="check-circle">&check;</div>
+                <span>Centralized owner ledger &amp; cross-branch reporting</span>
+            </div>
+            <div class="checklist-item">
+                <div class="check-circle">&check;</div>
+                <span>Independent Warden &amp; Staff role assignments</span>
+            </div>
+            <div class="checklist-item">
+                <div class="check-circle">&check;</div>
+                <span>Unified Fonepay / eSewa QR payment collections</span>
+            </div>
+            <div class="checklist-item">
+                <div class="check-circle">&check;</div>
+                <span>Automated WhatsApp rent invoices &amp; overdue reminders</span>
+            </div>
+        </div>
+
+        <button class="btn-expansion-cta" onclick="openAddPropertyModal()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>Add New Property</span>
+        </button>
+    </div>
+</div>
+
+<!-- Add New Property Modal -->
+<div class="prop-modal-backdrop" id="addPropertyModal">
+    <div class="prop-modal-box">
+        <div class="prop-modal-header">
+            <h3 class="prop-modal-title">Register New Branch</h3>
+            <button class="prop-modal-close" onclick="closeAddPropertyModal()">&times;</button>
+        </div>
+        <form method="POST" action="{% url 'web-properties' %}">
+            {% csrf_token %}
+            <div class="prop-modal-body">
+                <div class="prop-form-group">
+                    <label>Branch / Hostel Name *</label>
+                    <input type="text" name="name" required placeholder="e.g. HostelGhar Baneshwor Branch">
+                </div>
+
+                <div class="prop-form-group">
+                    <label>Address / Location *</label>
+                    <input type="text" name="address" required placeholder="e.g. New Baneshwor, Kathmandu (Near Shankhamul)">
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="prop-form-group">
+                        <label>Contact Phone</label>
+                        <input type="text" name="phone" placeholder="+977 9801234567">
+                    </div>
+                    <div class="prop-form-group">
+                        <label>Total Rooms Configured</label>
+                        <input type="number" name="total_rooms" value="10" min="1">
+                    </div>
+                </div>
+
+                <div class="prop-form-group">
+                    <label>Branch Email</label>
+                    <input type="email" name="email" placeholder="branch@hostelstay.in">
+                </div>
+
+                <div class="prop-form-group">
+                    <label>Description / Notes</label>
+                    <textarea name="description" rows="2" placeholder="Brief notes on hostel type, amenities, curfew..."></textarea>
+                </div>
+            </div>
+            <div class="prop-modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeAddPropertyModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">+ Register Branch</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function filterBranch(pgId) {
+        if (pgId) {
+            window.location.href = `?pg=${pgId}`;
+        } else {
+            window.location.href = `{% url 'web-properties' %}`;
+        }
+    }
+
+    function filterProperties(query) {
+        query = query.toLowerCase().trim();
+        const cards = document.querySelectorAll('.prop-item-card');
+        cards.forEach(card => {
+            const text = (card.getAttribute('data-search') || '').toLowerCase();
+            if (text.includes(query)) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+
+    function filterByLocation(loc) {
+        const input = document.getElementById('propSearchInput');
+        input.value = loc;
+        filterProperties(loc);
+    }
+
+    function switchView(mode) {
+        const grid = document.getElementById('propertiesGridView');
+        const table = document.getElementById('propertiesTableView');
+        const btnGrid = document.getElementById('btnGridView');
+        const btnTable = document.getElementById('btnTableView');
+
+        if (mode === 'grid') {
+            grid.style.display = 'block';
+            table.style.display = 'none';
+            btnGrid.classList.add('active');
+            btnTable.classList.remove('active');
+        } else {
+            grid.style.display = 'none';
+            table.style.display = 'block';
+            btnGrid.classList.remove('active');
+            btnTable.classList.add('active');
+        }
+    }
+
+    function openAddPropertyModal() {
+        document.getElementById('addPropertyModal').style.display = 'flex';
+    }
+
+    function closeAddPropertyModal() {
+        document.getElementById('addPropertyModal').style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('addPropertyModal');
+        if (event.target === modal) {
+            closeAddPropertyModal();
+        }
+    };
+</script>
+{% endblock %}

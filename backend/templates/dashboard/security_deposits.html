@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Security Deposits - HostelStay.in Owner{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-header-left">
+        <div class="page-title-row">
+            <h1 class="page-title">Caution &amp; Security Deposits</h1>
+            <span class="system-status-badge">Escrow Holdings</span>
+        </div>
+        <p class="page-subtitle">Security deposit balances held on behalf of registered tenants</p>
+    </div>
+</div>
+
+<div class="stats-grid-8" style="grid-template-columns: repeat(2, 1fr); margin-bottom: 24px;">
+    <div class="kpi-card">
+        <div class="kpi-header">
+            <span class="kpi-title">TOTAL DEPOSITS HELD</span>
+            <span class="kpi-badge kpi-badge-live">Escrow</span>
+        </div>
+        <div class="kpi-value-row">
+            <span class="kpi-value positive">Rs {{ total_deposits|floatformat:0 }}</span>
+        </div>
+        <div class="kpi-footer">
+            <span>Refundable liability</span>
+        </div>
+    </div>
+
+    <div class="kpi-card">
+        <div class="kpi-header">
+            <span class="kpi-title">TENANTS WITH DEPOSITS</span>
+        </div>
+        <div class="kpi-value-row">
+            <span class="kpi-value accent">{{ tenants_with_deposit }}</span>
+        </div>
+        <div class="kpi-footer">
+            <span>Covered residents</span>
+        </div>
+    </div>
+</div>
+
+{% if tenants %}
+<div class="card">
+    <div class="card-header">
+        <div class="card-header-left">
+            <h3>Deposit Records</h3>
+            <span class="card-header-badge">{{ tenants.count }} Tenants</span>
+        </div>
+    </div>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>TENANT</th>
+                    <th>BRANCH</th>
+                    <th>ROOM</th>
+                    <th>SECURITY DEPOSIT</th>
+                    <th>STATUS</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in tenants %}
+                <tr>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--slate-100); color: var(--slate-700); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700;">
+                                {{ t.name|slice:":1"|upper }}
+                            </div>
+                            <strong>{{ t.name }}</strong>
+                        </div>
+                    </td>
+                    <td>{{ t.pg.name }}</td>
+                    <td><span class="badge badge-secondary">Room {{ t.room.room_number|default:"-" }}</span></td>
+                    <td><strong style="color: var(--brand-blue); font-size: 13.5px;">Rs {{ t.security_deposit|floatformat:0 }}</strong></td>
+                    <td><span class="badge badge-{% if t.status == 'active' %}success{% else %}secondary{% endif %}">{{ t.status|title }}</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="card">
+    <div class="empty-state">
+        <h3>No security deposits recorded</h3>
+        <p>Tenant security deposit amounts will appear here.</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

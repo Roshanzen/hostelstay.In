@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Meals - HostelStay.in Owner{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-header-left">
+        <div class="page-title-row">
+            <h1 class="page-title">Mess &amp; Meal Attendance</h1>
+            <span class="system-status-badge">{{ meals.count }} Logs</span>
+        </div>
+        <p class="page-subtitle">Daily resident dining attendance, special meal requests, and guest meal fees</p>
+    </div>
+</div>
+
+{% if meals %}
+<div class="card">
+    <div class="card-header">
+        <div class="card-header-left">
+            <h3>Attendance Log</h3>
+            <span class="card-header-badge">{{ meals.count }} Entries</span>
+        </div>
+    </div>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>TENANT</th>
+                    <th>BRANCH</th>
+                    <th>DATE</th>
+                    <th>MEAL TYPE</th>
+                    <th>ATTENDED</th>
+                    <th>EXTRA CHARGE</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in meals %}
+                <tr>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 7px;">
+                            <div style="width: 26px; height: 26px; border-radius: 50%; background: var(--slate-100); color: var(--slate-700); display: flex; align-items: center; justify-content: center; font-size: 10.5px; font-weight: 700;">
+                                {{ m.tenant.name|slice:":1"|upper }}
+                            </div>
+                            <strong>{{ m.tenant.name }}</strong>
+                        </div>
+                    </td>
+                    <td>{{ m.pg.name }}</td>
+                    <td style="color: var(--slate-500); font-size: 12.5px;">{{ m.date|date:"M d, Y" }}</td>
+                    <td><span class="badge badge-info">{{ m.get_meal_type_display }}</span></td>
+                    <td>{% if m.attended %}<span class="badge badge-success">Attended</span>{% else %}<span class="badge badge-secondary">Skipped</span>{% endif %}</td>
+                    <td>{% if m.extra_charge %}Rs {{ m.extra_charge|floatformat:0 }}{% else %}<span style="color: var(--slate-400);">-</span>{% endif %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="card">
+    <div class="empty-state">
+        <h3>No meal records found</h3>
+        <p>Resident mess attendance logs will appear here.</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

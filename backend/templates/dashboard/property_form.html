@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if is_edit %}Edit {{ property.name }}{% else %}Create Property{% endif %} - HostelStay.in Owner{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-header-left">
+        <div class="page-title-row">
+            <h1 class="page-title">{% if is_edit %}Edit Property Branch{% else %}Create Property{% endif %}</h1>
+            <span class="system-status-badge">{% if is_edit %}Editing #{{ property.id }}{% else %}New Branch{% endif %}</span>
+        </div>
+        <p class="page-subtitle">
+            {% if is_edit %}
+            Update operational details, contact lines, and room inventory for {{ property.name }}.
+            {% else %}
+            Add a new PG or Hostel branch to your property portfolio.
+            {% endif %}
+        </p>
+    </div>
+    <div class="page-header-right">
+        <a href="{% url 'web-properties' %}" class="btn btn-secondary">&larr; Back to Properties</a>
+    </div>
+</div>
+
+<div class="card" style="max-width: 680px;">
+    <div class="card-header">
+        <div class="card-header-left">
+            <h3>{% if is_edit %}Branch Configuration{% else %}Property Information{% endif %}</h3>
+        </div>
+        {% if is_edit %}
+        <span class="badge badge-{% if property.status == 'active' %}success{% else %}warning{% endif %}">
+            {{ property.status|title }}
+        </span>
+        {% endif %}
+    </div>
+    <div class="card-body">
+        <form method="post" action="{% if is_edit %}{% url 'web-property-edit' property.id %}{% else %}{% url 'web-property-create' %}{% endif %}">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="id_name">Property / Branch Name *</label>
+                <input type="text" name="name" id="id_name" class="form-control" value="{{ property.name|default:'' }}" placeholder="e.g. Thamel boy hostel" required>
+            </div>
+
+            <div class="form-group">
+                <label for="id_address">Address / Location *</label>
+                <input type="text" name="address" id="id_address" class="form-control" value="{{ property.address|default:'' }}" placeholder="e.g. Koteshwor, Kathmandu (Near Ring Road Chowk)" required>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                <div class="form-group">
+                    <label for="id_phone">Contact Phone</label>
+                    <input type="text" name="phone" id="id_phone" class="form-control" value="{{ property.phone|default:'' }}" placeholder="e.g. +977 9807778303">
+                </div>
+
+                <div class="form-group">
+                    <label for="id_email">Email Address</label>
+                    <input type="email" name="email" id="id_email" class="form-control" value="{{ property.email|default:'' }}" placeholder="e.g. branch@hostelstay.in">
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                <div class="form-group">
+                    <label for="id_total_rooms">Total Rooms Configured</label>
+                    <input type="number" name="total_rooms" id="id_total_rooms" class="form-control" value="{{ property.total_rooms|default:10 }}" min="1">
+                </div>
+
+                {% if is_edit %}
+                <div class="form-group">
+                    <label for="id_status">Operational Status</label>
+                    <select name="status" id="id_status" class="form-control">
+                        <option value="active" {% if property.status == 'active' %}selected{% endif %}>Active (Accepting Residents)</option>
+                        <option value="inactive" {% if property.status == 'inactive' %}selected{% endif %}>Inactive (Paused)</option>
+                        <option value="archived" {% if property.status == 'archived' %}selected{% endif %}>Archived</option>
+                    </select>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_description">Description / Facilities</label>
+                <textarea name="description" id="id_description" class="form-control" rows="3" placeholder="Brief notes regarding meal plans, curfew hours, WiFi speed, etc.">{{ property.description|default:'' }}</textarea>
+            </div>
+
+            <div class="actions" style="margin-top: 24px; justify-content: space-between; display: flex; align-items: center;">
+                {% if is_edit %}
+                <a href="{% url 'web-property-detail' property.id %}" class="btn btn-secondary">Cancel</a>
+                {% else %}
+                <a href="{% url 'web-properties' %}" class="btn btn-secondary">Cancel</a>
+                {% endif %}
+                <button type="submit" class="btn btn-primary">
+                    {% if is_edit %}Save Changes{% else %}Save &amp; Create Property{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

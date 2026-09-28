@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Rooms - HostelStay.in Owner{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-header-left">
+        <div class="page-title-row">
+            <h1 class="page-title">Rooms Configuration</h1>
+            <span class="system-status-badge">{{ rooms.count }} Configured</span>
+        </div>
+        <p class="page-subtitle">Room inventory, floor layouts, and baseline rent tiers</p>
+    </div>
+    <div class="page-header-right">
+        <a href="{% url 'web-beds' %}" class="btn btn-secondary">View Bed Slots &rarr;</a>
+    </div>
+</div>
+
+{% if rooms %}
+<div class="card">
+    <div class="card-header">
+        <div class="card-header-left">
+            <h3>Configured Rooms</h3>
+            <span class="card-header-badge">{{ rooms.count }} Rooms</span>
+        </div>
+    </div>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>ROOM NUMBER</th>
+                    <th>BRANCH</th>
+                    <th>FLOOR</th>
+                    <th>TYPE</th>
+                    <th>CAPACITY</th>
+                    <th>RENT / MO</th>
+                    <th>STATUS</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in rooms %}
+                <tr>
+                    <td>
+                        <span class="room-id-pill" style="font-size: 12px;">Room {{ r.room_number }}</span>
+                    </td>
+                    <td>{{ r.pg.name }}</td>
+                    <td>{{ r.floor|default:"1st Floor" }}</td>
+                    <td><span class="badge badge-secondary">{{ r.room_type|default:"Standard" }}</span></td>
+                    <td><strong>{{ r.capacity }}</strong> beds</td>
+                    <td><strong style="color: var(--slate-900);">Rs {{ r.rent_amount|floatformat:0 }}</strong></td>
+                    <td>
+                        <span class="badge badge-{% if r.status == 'available' %}success{% else %}info{% endif %}">
+                            {{ r.status|title }}
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="card">
+    <div class="empty-state">
+        <h3>No rooms configured yet</h3>
+        <p>Rooms will appear once added to your properties.</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
