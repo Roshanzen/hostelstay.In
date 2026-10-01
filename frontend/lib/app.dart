@@ -48,16 +48,26 @@ class _HostelGharAppState extends State<HostelGharApp> {
     return ListenableBuilder(
       listenable: _state,
       builder: (context, _) {
-        final bool shouldStartAtHome = widget.startAtHome ?? _state.isLoggedIn;
+        final Widget homeScreen;
+        if (widget.startAtHome == true) {
+          homeScreen = MainScaffold(appState: _state);
+        } else if (widget.startAtHome == false) {
+          homeScreen = LandingScreen(appState: _state);
+        } else if (!_state.onboardingCompleted) {
+          homeScreen = LandingScreen(appState: _state);
+        } else if (_state.isLoggedIn) {
+          homeScreen = MainScaffold(appState: _state);
+        } else {
+          homeScreen = LoginScreen(appState: _state);
+        }
+
         return MaterialApp(
           title: 'HostelGhar — Warden Management App',
           debugShowCheckedModeBanner: false,
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: _state.themeMode,
-          home: shouldStartAtHome
-              ? MainScaffold(appState: _state)
-              : LandingScreen(appState: _state),
+          home: homeScreen,
           routes: {
             '/landing': (context) => LandingScreen(appState: _state),
             '/login': (context) => LoginScreen(appState: _state),

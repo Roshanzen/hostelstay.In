@@ -11,6 +11,7 @@ class AuthStorage {
 
   final FlutterSecureStorage _storage;
   final Box<dynamic>? _box;
+  void Function()? onSessionExpired;
 
   static const _accessKey = 'auth.accessToken';
   static const _refreshKey = 'auth.refreshToken';
@@ -120,5 +121,6 @@ class AuthStorage {
       await _storage.delete(key: _refreshKey);
       await _storage.delete(key: _profileKey);
     } catch (_) {}
+    onSessionExpired?.call();
   }
 }

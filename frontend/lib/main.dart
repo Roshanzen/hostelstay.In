@@ -22,5 +22,5 @@ void main() async {
       statusBarIconBrightness: Brightness.dark,
     ),
   );
-  runApp(HostelGharApp(startAtHome: hasToken));
+  runApp(const HostelGharApp());
 }

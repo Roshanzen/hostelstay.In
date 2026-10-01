@@ -88,16 +88,21 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return ResponsiveLayout(
-      child: Scaffold(
+    return PopScope(
+      canPop: Navigator.canPop(context) && !widget.appState.onboardingCompleted,
+      child: ResponsiveLayout(
+        child: Scaffold(
         backgroundColor: context.backgroundColor,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back_rounded, color: context.textPrimaryColor),
-            onPressed: () => Navigator.maybePop(context),
-          ),
+          automaticallyImplyLeading: false,
+          leading: Navigator.canPop(context) && !widget.appState.onboardingCompleted
+              ? IconButton(
+                  icon: Icon(Icons.arrow_back_rounded, color: context.textPrimaryColor),
+                  onPressed: () => Navigator.maybePop(context),
+                )
+              : null,
         ),
         body: SafeArea(
           child: Center(
@@ -246,6 +251,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
       ),
-    );
+    ),
+  );
   }
 }

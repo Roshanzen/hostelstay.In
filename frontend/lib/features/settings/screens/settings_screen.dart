@@ -4,7 +4,7 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../shared/widgets/property_switcher_modal.dart';
 import '../../../state/app_state.dart';
-import '../../landing/screens/landing_screen.dart';
+import '../../authentication/screens/login_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   final AppState state;
@@ -54,7 +54,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               if (!mounted) return;
               Navigator.pushAndRemoveUntil(
                 context,
-                MaterialPageRoute(builder: (context) => LandingScreen(appState: widget.state)),
+                MaterialPageRoute(builder: (context) => LoginScreen(appState: widget.state)),
                 (route) => false,
               );
             },

@@ -33,10 +33,13 @@ class _LandingScreenState extends State<LandingScreen> {
     super.dispose();
   }
 
-  void _navigateToLogin() {
-    Navigator.push(
+  void _navigateToLogin() async {
+    await _appState.completeOnboarding();
+    if (!mounted) return;
+    Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => LoginScreen(appState: _appState)),
+      (route) => false,
     );
   }
 

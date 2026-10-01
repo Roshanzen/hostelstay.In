@@ -9,6 +9,7 @@ import '../../tenants/screens/tenants_screen.dart';
 import '../../billing/screens/billing_screen.dart';
 import '../../maintenance/screens/maintenance_screen.dart';
 import '../../settings/screens/settings_screen.dart';
+import '../../authentication/screens/login_screen.dart';
 
 class MainScaffold extends StatefulWidget {
   final int initialIndex;
@@ -31,7 +32,16 @@ class _MainScaffoldState extends State<MainScaffold> {
   }
 
   void _onStateChanged() {
-    if (mounted) setState(() {});
+    if (mounted) {
+      if (!widget.appState.isLoggedIn) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => LoginScreen(appState: widget.appState)),
+          (route) => false,
+        );
+        return;
+      }
+      setState(() {});
+    }
   }
 
   @override

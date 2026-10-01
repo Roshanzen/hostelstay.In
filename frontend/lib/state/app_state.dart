@@ -112,7 +112,21 @@ class AppState extends ChangeNotifier {
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
 
-  bool _isLoggedIn = true;
+  static const String onboardingCompletedKey = 'onboarding.completed';
+
+  bool _onboardingCompleted = false;
+  bool get onboardingCompleted => _onboardingCompleted;
+
+  Future<void> completeOnboarding() async {
+    if (_isDisposed) return;
+    _onboardingCompleted = true;
+    if (_isInitialized) {
+      await _settings.put(onboardingCompletedKey, true);
+    }
+    notifyListeners();
+  }
+
+  bool _isLoggedIn = false;
   bool get isLoggedIn => _isLoggedIn;
 
   // Active Property
@@ -253,11 +267,26 @@ class AppState extends ChangeNotifier {
       _themeMode = ThemeMode.light;
     }
 
+    final savedOnboarding = _settings.get(onboardingCompletedKey) ?? _settings.get('onboardingCompleted');
+    _onboardingCompleted = savedOnboarding == true || savedOnboarding == 'true';
+
     final token = _authStorage.accessToken;
     _isLoggedIn = token != null && token.isNotEmpty;
     if (_isLoggedIn) {
+      _onboardingCompleted = true;
       debugPrint('[AUTH] Credential restored');
     }
+
+    _authStorage.onSessionExpired = () {
+      if (_isDisposed) return;
+      if (_isLoggedIn) {
+        debugPrint('[AUTH] Logout triggered');
+        debugPrint('[AUTH] Logout reason: Session expired');
+        _isLoggedIn = false;
+        notifyListeners();
+      }
+    };
+
     _updateWardenFromStorage();
     _isInitialized = true;
     if (_isLoggedIn) {
